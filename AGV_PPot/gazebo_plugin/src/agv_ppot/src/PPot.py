@@ -154,13 +154,14 @@ vel_p_y = Roc_vel_0[0]*sin(Rob_pos_0[2])
 #########################################################################################################
 #######################################################################
 #APF Inputs
-goal_data = None
+goal_data = []
 def get_Goal(data):
     global goal_data
     goal_data = data.data
+    print(data.data)
        
-rospy.Subscriber('/goal', Float64MultiArray, get_Goal)       #Identify the subscriber "sub1" to subscribe topic "/odom" of type "Odometry"
-
+rospy.Subscriber('/goal', Float64MultiArray, get_Goal)      #Identify the subscriber "sub1" to subscribe topic "/odom" of type "Odometry"
+print(goal_data)
 Goal_Pos = [goal_data[0],goal_data[1]]
 #Goal_Pos = [rospy.get_param("~x_Goal"),rospy.get_param("~y_Goal")]
 #Obs_Pos = [rospy.get_param("~x_Obs1"),rospy.get_param("~y_Obs1"),rospy.get_param("~x_Obs2"),rospy.get_param("~y_Obs2"),rospy.get_param("~x_Obs3"),rospy.get_param("~y_Obs3"),rospy.get_param("~x_Obs_dash"),rospy.get_param("~y_Obs_dash"),rospy.get_param("~x_Obs4"),rospy.get_param("~y_Obs4"), rospy.get_param("~x_Obs5"),rospy.get_param("~y_Obs5"), rospy.get_param("~x_Obs6"),rospy.get_param("~y_Obs6"), rospy.get_param("~x_Obs7"),rospy.get_param("~y_Obs7"), rospy.get_param("~x_Obs8"),rospy.get_param("~y_Obs8")]
