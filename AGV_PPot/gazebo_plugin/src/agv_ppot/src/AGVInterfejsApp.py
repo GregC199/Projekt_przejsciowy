@@ -1515,7 +1515,7 @@ class Ui_MainWindow(object):
         self.TxtXKursor.setText(str(self.kursor_x))
         self.TxtYKursor.setText(str(self.kursor_y))
         
-        pub = rospy.Publisher('goal', Float64MultiArray, queue_size=10)
+        pub = rospy.Publisher('goal', Float64MultiArray, queue_size=200)
         data_to_send = Float64MultiArray()
         data_to_send.data = [self.kursor_x, self.kursor_y]
         pub.publish(data_to_send)
