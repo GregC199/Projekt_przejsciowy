@@ -63,8 +63,8 @@ class MplWidget(QtWidgets.QWidget):
         self.canvas.mpl_connect("button_press_event", self.on_press)
         
     def on_press(self,event):
-        self.mouse_x = event.x
-        self.mouse_y = event.y
+        self.mouse_x = round(event.xdata,2)
+        self.mouse_y = round(event.ydata,2)
         self.mouse_pressed.emit()
     
 
@@ -1497,8 +1497,8 @@ class Ui_MainWindow(object):
         else:
             self.sc.canvas.ax.cla()
             
-        x1 = np.linspace(0, 500, 500)
-        y1 = np.linspace(0, 500, 500)
+        x1 = np.linspace(-10, 10, 500)
+        y1 = np.linspace(-10, 10, 500)
         
         self.sc.canvas.ax.plot(x1, y1,'r',linewidth=1.5)
         
@@ -1515,7 +1515,7 @@ class Ui_MainWindow(object):
         self.TxtXKursor.setText(str(self.kursor_x))
         self.TxtYKursor.setText(str(self.kursor_y))
         
-        pub = rospy.Publisher('goal', Float64MultiArray, queue_size=200)
+        pub = rospy.Publisher('goal', Float64MultiArray, queue_size=400)
         data_to_send = Float64MultiArray()
         data_to_send.data = [self.kursor_x, self.kursor_y]
         pub.publish(data_to_send)
