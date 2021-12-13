@@ -25,6 +25,8 @@ from tensorflow.python.ops.gen_data_flow_ops import queue_size
 
 matplotlib.use('QT5Agg')
 
+rospy.init_node('/goal', anonymous=True)
+
 class MplCanvas(Canvas):   
     def __init__(self):
         self.fig = Figure()
@@ -1479,6 +1481,7 @@ class Ui_MainWindow(object):
     def UI_main(self):
         self.Wyrysuj_mape()
         self.sc.mouse_pressed.connect(self.Pobierz_pozycje)
+        
         
     def Wyrysuj_mape(self):
         
