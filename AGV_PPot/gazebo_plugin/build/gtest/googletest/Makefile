@@ -48,7 +48,7 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/greg/Pulpit/AGV_PPot/gazebo_plugin/src
+CMAKE_SOURCE_DIR = /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/src
 
 # The top-level build directory on which CMake was run.
 CMAKE_BINARY_DIR = /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build
