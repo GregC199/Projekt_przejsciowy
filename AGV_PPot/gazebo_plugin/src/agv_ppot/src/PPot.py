@@ -228,6 +228,9 @@ rob_mass = rospy.get_param("~rob_mass") #Robot Mass (Turtlebot 3 Waffle_pi)
 
 while 1 and not rospy.is_shutdown():
     if flag_cont == 1:
+        
+        sub_goal=rospy.Subscriber('goal', Float64MultiArray, get_Goal)      #Identify the subscriber "sub1" to subscribe topic "/odom" of type "Odometry"
+        Goal_Pos = goal_data
         #Get Robot Current Position and Velocity
         Rob_pos = [position[0],position[1],position[3]]
         Rob_vel = [velocity[0],velocity[5]]
