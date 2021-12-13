@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import rospy
 
 # -*- coding: utf-8 -*-
 
@@ -21,11 +20,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as Canvas
 import matplotlib
 import matplotlib.pyplot as plt
 from std_msgs.msg._Float64MultiArray import Float64MultiArray
-from tensorflow.python.ops.gen_data_flow_ops import queue_size
 
 matplotlib.use('QT5Agg')
-
-rospy.init_node('talker', anonymous=True)
+#import rospy
+#rospy.init_node('talker', anonymous=True)
 
 class MplCanvas(Canvas):   
     def __init__(self):
@@ -45,19 +43,28 @@ class MplWidget(QtWidgets.QWidget):
     def reinit(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)   # Dziedziczy QWidget
         self.canvas = MplCanvas()                  
-        self.vbl = QtWidgets.QVBoxLayout()         
+        self.vbl = QtWidgets.QVBoxLayout()
+        self.vbl.setContentsMargins(0, 0, 0, 0)
+        self.vbl.setSpacing(0)         
         self.vbl.addWidget(self.canvas)
+        self.setMouseTracking(True)
         self.setLayout(self.vbl)
+        self.canvas.mpl_connect("button_press_event", self.on_press)
+        
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)   # Dziedziczy QWidget
         self.canvas = MplCanvas()                  # Tworzy obiekt canvas
         self.vbl = QtWidgets.QVBoxLayout()         # Box do plotowania
+        self.vbl.setContentsMargins(0, 0, 0, 0)
+        self.vbl.setSpacing(0)
+        self.setMouseTracking(True)
         self.vbl.addWidget(self.canvas)
         self.setLayout(self.vbl)
-        self.setMouseTracking(True)
-    def mousePressEvent(self, event):
-        self.mouse_x = event.x()
-        self.mouse_y = event.y()
+        self.canvas.mpl_connect("button_press_event", self.on_press)
+        
+    def on_press(self,event):
+        self.mouse_x = event.x
+        self.mouse_y = event.y
         self.mouse_pressed.emit()
     
 
@@ -66,8 +73,6 @@ class Ui_MainWindow(object):
     
     kursor_x = 0
     kursor_y = 0
-    
-    layout = QtWidgets.QGridLayout()
     
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -1122,10 +1127,6 @@ class Ui_MainWindow(object):
         self.MapaWidget.setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
         self.MapaWidget.setMouseTracking(True)
         self.MapaWidget.setObjectName("MapaWidget")
-        self.gridLayout_4 = QtWidgets.QGridLayout(self.MapaWidget)
-        self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout_4.setSpacing(0)
-        self.gridLayout_4.setObjectName("gridLayout_4")
         self.gridLayout_2.addWidget(self.MapaWidget, 0, 0, 1, 1)
         self.horizontalLayout_11.addWidget(self.FrameMapa)
         self.LayoutMapa.addLayout(self.horizontalLayout_11)
@@ -1486,6 +1487,10 @@ class Ui_MainWindow(object):
     def Wyrysuj_mape(self):
         
         if self.mapa_init == 0:
+            self.layout = QtWidgets.QGridLayout()
+            self.layout.setContentsMargins(0, 0, 0, 0)
+            self.layout.setSpacing(0)
+            self.layout.setObjectName("MapaLayout")
             self.sc = MplWidget(self.MapaWidget)
             self.layout.addWidget(self.sc)
             self.MapaWidget.setLayout(self.layout)
@@ -1509,11 +1514,11 @@ class Ui_MainWindow(object):
         
         self.TxtXKursor.setText(str(self.kursor_x))
         self.TxtYKursor.setText(str(self.kursor_y))
-        
+        '''
         pub = rospy.Publisher('goal', Float64MultiArray, queue_size=10)
         data_to_send = Float64MultiArray()
         data_to_send.data = [self.kursor_x, self.kursor_y]
-        pub.publish(data_to_send)
+        pub.publish(data_to_send)'''
         
 
 if __name__ == "__main__":
