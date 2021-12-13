@@ -1,3 +1,3 @@
 #!/bin/bash
-sudo pyuic5 AGV.ui -o AGVInterfejsApp.py -x
-sudo chmod 777 AGVInterfejsApp.py
+sudo pyuic5 AGV.ui -o AGVInterfejs.py -x
+sudo chmod 777 AGVInterfejs.py
