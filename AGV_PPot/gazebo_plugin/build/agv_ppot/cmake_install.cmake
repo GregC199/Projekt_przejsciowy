@@ -1,8 +1,8 @@
-# Install script for directory: /home/greg/Pulpit/AGV_PPot/gazebo_plugin/src/agv_ppot
+# Install script for directory: /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/src/agv_ppot
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/greg/Pulpit/AGV_PPot/gazebo_plugin/install")
+  set(CMAKE_INSTALL_PREFIX "/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -49,6 +49,6 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/agv_ppot" TYPE FILE FILES "/home/greg/Pulpit/AGV_PPot/gazebo_plugin/src/agv_ppot/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/agv_ppot" TYPE FILE FILES "/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/src/agv_ppot/package.xml")
 endif()
 

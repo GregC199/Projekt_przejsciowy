@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import rospy
+
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'AGV.ui'
@@ -9,9 +11,62 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+import numpy as np
+import math
+import matplotlib 
+from PyQt5.Qt import QVBoxLayout, QWidget, QMouseEvent, pyqtSignal
 
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as Canvas
+import matplotlib
+import matplotlib.pyplot as plt
+from std_msgs.msg._Float64MultiArray import Float64MultiArray
+from tensorflow.python.ops.gen_data_flow_ops import queue_size
+
+matplotlib.use('QT5Agg')
+
+class MplCanvas(Canvas):   
+    def __init__(self):
+        self.fig = Figure()
+        self.ax = self.fig.add_subplot(111)
+        Canvas.__init__(self, self.fig)
+        Canvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        Canvas.updateGeometry(self)
+        
+# Matplotlib widget
+class MplWidget(QtWidgets.QWidget):
+    mouse_x = 0
+    mouse_y = 0
+    
+    mouse_pressed = pyqtSignal()
+    
+    def reinit(self, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)   # Dziedziczy QWidget
+        self.canvas = MplCanvas()                  
+        self.vbl = QtWidgets.QVBoxLayout()         
+        self.vbl.addWidget(self.canvas)
+        self.setLayout(self.vbl)
+    def __init__(self, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)   # Dziedziczy QWidget
+        self.canvas = MplCanvas()                  # Tworzy obiekt canvas
+        self.vbl = QtWidgets.QVBoxLayout()         # Box do plotowania
+        self.vbl.addWidget(self.canvas)
+        self.setLayout(self.vbl)
+        self.setMouseTracking(True)
+    def mousePressEvent(self, event):
+        self.mouse_x = event.x()
+        self.mouse_y = event.y()
+        self.mouse_pressed.emit()
+    
 
 class Ui_MainWindow(object):
+    mapa_init = 0
+    
+    kursor_x = 0
+    kursor_y = 0
+    
+    layout = QtWidgets.QGridLayout()
+    
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(940, 760)
@@ -1066,6 +1121,8 @@ class Ui_MainWindow(object):
         self.MapaWidget.setMouseTracking(True)
         self.MapaWidget.setObjectName("MapaWidget")
         self.gridLayout_4 = QtWidgets.QGridLayout(self.MapaWidget)
+        self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_4.setSpacing(0)
         self.gridLayout_4.setObjectName("gridLayout_4")
         self.gridLayout_2.addWidget(self.MapaWidget, 0, 0, 1, 1)
         self.horizontalLayout_11.addWidget(self.FrameMapa)
@@ -1386,6 +1443,10 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        
+        self.UI_main()
+        
+        
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -1414,7 +1475,43 @@ class Ui_MainWindow(object):
         self.TxtYKursor.setPlaceholderText(_translate("MainWindow", "Poz. Y"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Tab_Ster), _translate("MainWindow", "Sterowanie"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Tab_Mapa), _translate("MainWindow", "Mapa"))
-
+    
+    def UI_main(self):
+        self.Wyrysuj_mape()
+        self.sc.mouse_pressed.connect(self.Pobierz_pozycje)
+        
+    def Wyrysuj_mape(self):
+        
+        if self.mapa_init == 0:
+            self.sc = MplWidget(self.MapaWidget)
+            self.layout.addWidget(self.sc)
+            self.MapaWidget.setLayout(self.layout)
+        else:
+            self.sc.canvas.ax.cla()
+            
+        x1 = np.linspace(0, 500, 500)
+        y1 = np.linspace(0, 500, 500)
+        
+        self.sc.canvas.ax.plot(x1, y1,'r',linewidth=1.5)
+        
+        if self.mapa_init == 0:
+            self.sc.canvas.draw()
+            self.mapa_init = 1
+        else:
+            self.sc.canvas.draw_idle()
+    
+    def Pobierz_pozycje(self):
+        self.kursor_x = self.sc.mouse_x
+        self.kursor_y = self.sc.mouse_y
+        
+        self.TxtXKursor.setText(str(self.kursor_x))
+        self.TxtYKursor.setText(str(self.kursor_y))
+        
+        pub = rospy.Publisher('/goal', Float64MultiArray, queue_size=10)
+        data_to_send = Float64MultiArray()
+        data_to_send.data = [self.kursor_x, self.kursor_y]
+        pub.publish(data_to_send)
+        
 
 if __name__ == "__main__":
     import sys
