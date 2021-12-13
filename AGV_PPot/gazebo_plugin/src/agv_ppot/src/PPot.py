@@ -62,31 +62,31 @@ velocity = np.zeros((1,6))
 ##Callback function for feedback the vehicle current position
 #Callback function which is called when a new message of type Pose is received by the subscriber
 def callback(data):
-  global pos_msg	#Identify msg variable created as global variable
-  global sub2		#Identify a subscriber as global variable
-  global flag_cont
-  global position 
-  global Velocity_msg
-  global velocity
-
-  msg = data
-  pos_msg.position.x = round(msg.pose.pose.position.x, 4)		#Round the value of x to 4 decimal places
-  pos_msg.position.y = round(msg.pose.pose.position.y, 4)		#Round the value of y to 4 decimal places
-  pos_msg.position.z = round(msg.pose.pose.position.z, 4)		#Round the value of y to 4 decimal places
-  pos_msg.orientation.x = round(msg.pose.pose.orientation.x, 4)	#Round the value of theta to 4 decimal places
-  pos_msg.orientation.y = round(msg.pose.pose.orientation.y, 4)	#Round the value of theta to 4 decimal places
-  pos_msg.orientation.z = round(msg.pose.pose.orientation.z, 4)	#Round the value of theta to 4 decimal places
-  pos_msg.orientation.w = round(msg.pose.pose.orientation.w, 4)	#Round the value of theta to 4 decimal places
-  [yaw, pitch, roll] = quaternion_to_euler(pos_msg.orientation.x, pos_msg.orientation.y, pos_msg.orientation.z, pos_msg.orientation.w)
-  position = [pos_msg.position.x,pos_msg.position.y,pos_msg.position.z,yaw, pitch, roll]
-  Velocity_msg.linear.x = round(msg.twist.twist.linear.x, 4)
-  Velocity_msg.linear.y = round(msg.twist.twist.linear.y, 4)
-  Velocity_msg.linear.z = round(msg.twist.twist.linear.z, 4)
-  Velocity_msg.angular.x = round(msg.twist.twist.angular.x, 4)
-  Velocity_msg.angular.y = round(msg.twist.twist.angular.y, 4)
-  Velocity_msg.angular.z = round(msg.twist.twist.angular.z, 4)
-  velocity = [Velocity_msg.linear.x,Velocity_msg.linear.y,Velocity_msg.linear.z,Velocity_msg.angular.x,Velocity_msg.angular.y,Velocity_msg.angular.z]
-  flag_cont = 1
+    global pos_msg	#Identify msg variable created as global variable
+    global sub2		#Identify a subscriber as global variable
+    global flag_cont
+    global position 
+    global Velocity_msg
+    global velocity
+    
+    msg = data
+    pos_msg.position.x = round(msg.pose.pose.position.x, 4)		#Round the value of x to 4 decimal places
+    pos_msg.position.y = round(msg.pose.pose.position.y, 4)		#Round the value of y to 4 decimal places
+    pos_msg.position.z = round(msg.pose.pose.position.z, 4)		#Round the value of y to 4 decimal places
+    pos_msg.orientation.x = round(msg.pose.pose.orientation.x, 4)	#Round the value of theta to 4 decimal places
+    pos_msg.orientation.y = round(msg.pose.pose.orientation.y, 4)	#Round the value of theta to 4 decimal places
+    pos_msg.orientation.z = round(msg.pose.pose.orientation.z, 4)	#Round the value of theta to 4 decimal places
+    pos_msg.orientation.w = round(msg.pose.pose.orientation.w, 4)	#Round the value of theta to 4 decimal places
+    [yaw, pitch, roll] = quaternion_to_euler(pos_msg.orientation.x, pos_msg.orientation.y, pos_msg.orientation.z, pos_msg.orientation.w)
+    position = [pos_msg.position.x,pos_msg.position.y,pos_msg.position.z,yaw, pitch, roll]
+    Velocity_msg.linear.x = round(msg.twist.twist.linear.x, 4)
+    Velocity_msg.linear.y = round(msg.twist.twist.linear.y, 4)
+    Velocity_msg.linear.z = round(msg.twist.twist.linear.z, 4)
+    Velocity_msg.angular.x = round(msg.twist.twist.angular.x, 4)
+    Velocity_msg.angular.y = round(msg.twist.twist.angular.y, 4)
+    Velocity_msg.angular.z = round(msg.twist.twist.angular.z, 4)
+    velocity = [Velocity_msg.linear.x,Velocity_msg.linear.y,Velocity_msg.linear.z,Velocity_msg.angular.x,Velocity_msg.angular.y,Velocity_msg.angular.z]
+    flag_cont = 1
 
 sub2 = rospy.Subscriber('/odom', Odometry, callback) #Identify the subscriber "sub2" to subscribe topic "/odom" of type "Odometry"
 #######################################################################
@@ -103,39 +103,39 @@ velocity_0 = np.zeros((1,6))
 #Initial callback function for setting the vehicle initial position
 #Callback function which is called when a new message of type Pose is received by the subscriber 
 def callback_Init(data):
-  global pos_msg_0		#Identify msg variable created as global variable
-  global sub1			#Identify a subscriber as global variable
-  global flag_initial 	#Identify flag created as global variable
-  global position_0 
-  global Velocity_msg_0
-  global velocity_0
-
-  msg = data
-  pos_msg_0.position.x = round(msg.pose.pose.position.x, 4)		#Round the value of x to 4 decimal places
-  pos_msg_0.position.y = round(msg.pose.pose.position.y, 4)		#Round the value of y to 4 decimal places
-  pos_msg_0.position.z = round(msg.pose.pose.position.z, 4)		#Round the value of y to 4 decimal places
-  pos_msg_0.orientation.x = round(msg.pose.pose.orientation.x, 4)	#Round the value of theta to 4 decimal places
-  pos_msg_0.orientation.y = round(msg.pose.pose.orientation.y, 4)	#Round the value of theta to 4 decimal places
-  pos_msg_0.orientation.z = round(msg.pose.pose.orientation.z, 4)	#Round the value of theta to 4 decimal places
-  pos_msg_0.orientation.w = round(msg.pose.pose.orientation.w, 4)	#Round the value of theta to 4 decimal places
-  [yaw, pitch, roll] = quaternion_to_euler(pos_msg.orientation.x, pos_msg.orientation.y, pos_msg.orientation.z, pos_msg.orientation.w)
-  position_0 = [pos_msg.position.x,pos_msg.position.y,pos_msg.position.z,yaw, pitch, roll]
-  Velocity_msg_0.linear.x = round(msg.twist.twist.linear.x, 4)
-  Velocity_msg_0.linear.y = round(msg.twist.twist.linear.y, 4)
-  Velocity_msg_0.linear.z = round(msg.twist.twist.linear.z, 4)
-  Velocity_msg_0.angular.x = round(msg.twist.twist.angular.x, 4)
-  Velocity_msg_0.angular.y = round(msg.twist.twist.angular.y, 4)
-  Velocity_msg_0.angular.z = round(msg.twist.twist.angular.z, 4)
-  velocity_0 = [Velocity_msg_0.linear.x,Velocity_msg_0.linear.y,Velocity_msg_0.linear.z,Velocity_msg_0.angular.x,Velocity_msg_0.angular.y,Velocity_msg_0.angular.z]
-  flag_initial = 1
-  sub1.unregister()				#Unsubsribe from this topic
+    global pos_msg_0		#Identify msg variable created as global variable
+    global sub1			#Identify a subscriber as global variable
+    global flag_initial 	#Identify flag created as global variable
+    global position_0 
+    global Velocity_msg_0
+    global velocity_0
+    
+    msg = data
+    pos_msg_0.position.x = round(msg.pose.pose.position.x, 4)		#Round the value of x to 4 decimal places
+    pos_msg_0.position.y = round(msg.pose.pose.position.y, 4)		#Round the value of y to 4 decimal places
+    pos_msg_0.position.z = round(msg.pose.pose.position.z, 4)		#Round the value of y to 4 decimal places
+    pos_msg_0.orientation.x = round(msg.pose.pose.orientation.x, 4)	#Round the value of theta to 4 decimal places
+    pos_msg_0.orientation.y = round(msg.pose.pose.orientation.y, 4)	#Round the value of theta to 4 decimal places
+    pos_msg_0.orientation.z = round(msg.pose.pose.orientation.z, 4)	#Round the value of theta to 4 decimal places
+    pos_msg_0.orientation.w = round(msg.pose.pose.orientation.w, 4)	#Round the value of theta to 4 decimal places
+    [yaw, pitch, roll] = quaternion_to_euler(pos_msg.orientation.x, pos_msg.orientation.y, pos_msg.orientation.z, pos_msg.orientation.w)
+    position_0 = [pos_msg.position.x,pos_msg.position.y,pos_msg.position.z,yaw, pitch, roll]
+    Velocity_msg_0.linear.x = round(msg.twist.twist.linear.x, 4)
+    Velocity_msg_0.linear.y = round(msg.twist.twist.linear.y, 4)
+    Velocity_msg_0.linear.z = round(msg.twist.twist.linear.z, 4)
+    Velocity_msg_0.angular.x = round(msg.twist.twist.angular.x, 4)
+    Velocity_msg_0.angular.y = round(msg.twist.twist.angular.y, 4)
+    Velocity_msg_0.angular.z = round(msg.twist.twist.angular.z, 4)
+    velocity_0 = [Velocity_msg_0.linear.x,Velocity_msg_0.linear.y,Velocity_msg_0.linear.z,Velocity_msg_0.angular.x,Velocity_msg_0.angular.y,Velocity_msg_0.angular.z]
+    flag_initial = 1
+    sub1.unregister()				#Unsubsribe from this topic
 
 sub1 = rospy.Subscriber('/odom', Odometry, callback_Init) #Identify the subscriber "sub1" to subscribe topic "/odom" of type "Odometry"
 #######################################################################
 #######################################################################
 ##Stop code here till subscribe the first msg of the vehicle position
 while flag_initial == 0:
-  pass
+    pass
 #######################################################################
 
 #######################################################################
@@ -180,33 +180,33 @@ Fx_rep = -APF_Param[1]*((1/d_obs)-(1/qstar))*(-(x_rob-x_obs)/(d_obs**3))
 Fy_rep = -APF_Param[1]*((1/d_obs)-(1/qstar))*(-(y_rob-y_obs)/(d_obs**3))
 #######################################################################
 def APF_Fn(Rob_pos,Goal_pos,Obs_pos,APF_Param):
-  global Fx_att
-  global Fy_att
-  global d_obs
-  global Fx_rep
-  global Fy_rep
+    global Fx_att
+    global Fy_att
+    global d_obs
+    global Fx_rep
+    global Fy_rep
+    
+    Fx_att_val = Fx_att.subs([(x_rob,Rob_pos[0]),(x_goal,Goal_pos[0])])
+    Fy_att_val = Fy_att.subs([(y_rob,Rob_pos[1]),(y_goal,Goal_pos[1])])
+    Fx_rep_val=0
+    Fy_rep_val=0
+    i=0
+    j=0
+    while j<9:
+        d_obs_val = d_obs.subs([(x_rob,Rob_pos[0]),(y_rob,Rob_pos[1]),(x_obs,Obs_pos[i]),(y_obs,Obs_pos[i+1])])
+        if d_obs_val<APF_Param[j+2]:
+            Fx_rep_val += Fx_rep.subs([(x_rob,Rob_pos[0]),(y_rob,Rob_pos[1]),(x_obs,Obs_pos[i]),(y_obs,Obs_pos[i+1]),(d_obs,d_obs_val),(qstar,APF_Param[j+2])])
+            Fy_rep_val += Fy_rep.subs([(x_rob,Rob_pos[0]),(y_rob,Rob_pos[1]),(x_obs,Obs_pos[i]),(y_obs,Obs_pos[i+1]),(d_obs,d_obs_val),(qstar,APF_Param[j+2])])
+        else:
+            Fx_rep_val += 0
+            Fy_rep_val += 0 
+        i +=2
+        j +=1
   
-  Fx_att_val = Fx_att.subs([(x_rob,Rob_pos[0]),(x_goal,Goal_pos[0])])
-  Fy_att_val = Fy_att.subs([(y_rob,Rob_pos[1]),(y_goal,Goal_pos[1])])
-  Fx_rep_val=0
-  Fy_rep_val=0
-  i=0
-  j=0
-  while j<9:
-    d_obs_val = d_obs.subs([(x_rob,Rob_pos[0]),(y_rob,Rob_pos[1]),(x_obs,Obs_pos[i]),(y_obs,Obs_pos[i+1])])
-    if d_obs_val<APF_Param[j+2]:
-      Fx_rep_val += Fx_rep.subs([(x_rob,Rob_pos[0]),(y_rob,Rob_pos[1]),(x_obs,Obs_pos[i]),(y_obs,Obs_pos[i+1]),(d_obs,d_obs_val),(qstar,APF_Param[j+2])])
-      Fy_rep_val += Fy_rep.subs([(x_rob,Rob_pos[0]),(y_rob,Rob_pos[1]),(x_obs,Obs_pos[i]),(y_obs,Obs_pos[i+1]),(d_obs,d_obs_val),(qstar,APF_Param[j+2])])
-    else:
-      Fx_rep_val += 0
-      Fy_rep_val += 0 
-    i +=2
-    j +=1
-  
-  Fx_net_val = Fx_att_val + Fx_rep_val
-  Fy_net_val = Fy_att_val + Fy_rep_val
-  F_xy_net = [Fx_net_val,Fy_net_val]
-  return F_xy_net
+    Fx_net_val = Fx_att_val + Fx_rep_val
+    Fy_net_val = Fy_att_val + Fy_rep_val
+    F_xy_net = [Fx_net_val,Fy_net_val]
+    return F_xy_net
 #######################################################################
 #########################################################################################################
 
@@ -217,32 +217,33 @@ rob_mass = rospy.get_param("~rob_mass") #Robot Mass (Turtlebot 3 Waffle_pi)
 
 while 1 and not rospy.is_shutdown():
     if flag_cont == 1:
-	#Get Robot Current Position and Velocity
-	Rob_pos = [position[0],position[1],position[3]]
-	Rob_vel = [velocity[0],velocity[5]]
-	
-	#Implement Artificial Potential Field
+        #Get Robot Current Position and Velocity
+        Rob_pos = [position[0],position[1],position[3]]
+        Rob_vel = [velocity[0],velocity[5]]
+        
+        #Implement Artificial Potential Field
         F_xy_net = APF_Fn(Rob_pos,Goal_Pos,Obs_Pos,APF_Param)
-	F_net = float(sqrt(F_xy_net[0]**2+F_xy_net[1]**2))
-	F_net_direct = float(atan2(F_xy_net[1],F_xy_net[0]))
-	
-	#Calculate the desired robot position from the APF
-	vel_c_x = vel_p_x + (F_xy_net[0]/rob_mass)*tau
-	vel_c_y = vel_p_y + (F_xy_net[1]/rob_mass)*tau
-	x_des = x_p + vel_c_x*tau
-	y_des = y_p + vel_c_y*tau
-	theta_des = F_net_direct
-	Rob_pos_des = [x_des,y_des,theta_des]
-
-	#Update the previous robot states for the next iteration
-	vel_p_x = Rob_vel[0]*cos(Rob_pos[2])
-	vel_p_y = Rob_vel[0]*sin(Rob_pos[2])
-	x_p = Rob_pos[0]
-	y_p = Rob_pos[1]
+        F_net = float(sqrt(F_xy_net[0]**2+F_xy_net[1]**2))
+        F_net_direct = float(atan2(F_xy_net[1],F_xy_net[0]))
+        
+        #Calculate the desired robot position from the APF
+        vel_c_x = vel_p_x + (F_xy_net[0]/rob_mass)*tau
+        vel_c_y = vel_p_y + (F_xy_net[1]/rob_mass)*tau
+        x_des = x_p + vel_c_x*tau
+        y_des = y_p + vel_c_y*tau
+        theta_des = F_net_direct
+        Rob_pos_des = [x_des,y_des,theta_des]
+        
+        #Update the previous robot states for the next iteration
+        vel_p_x = Rob_vel[0]*cos(Rob_pos[2])
+        vel_p_y = Rob_vel[0]*sin(Rob_pos[2])
+        x_p = Rob_pos[0]
+        y_p = Rob_pos[1]
         flag_cont = 0
+
     else:
-	Rob_pos_des = Rob_pos
-    
+        Rob_pos_des = Rob_pos
+        
     Des_Pos_msg.position.x = Rob_pos_des[0]
     Des_Pos_msg.position.y = Rob_pos_des[1]
     Des_Pos_msg.position.z = 0
