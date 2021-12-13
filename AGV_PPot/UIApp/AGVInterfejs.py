@@ -1065,6 +1065,8 @@ class Ui_MainWindow(object):
         self.MapaWidget.setMouseTracking(True)
         self.MapaWidget.setObjectName("MapaWidget")
         self.gridLayout_4 = QtWidgets.QGridLayout(self.MapaWidget)
+        self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_4.setSpacing(0)
         self.gridLayout_4.setObjectName("gridLayout_4")
         self.gridLayout_2.addWidget(self.MapaWidget, 0, 0, 1, 1)
         self.horizontalLayout_11.addWidget(self.FrameMapa)
