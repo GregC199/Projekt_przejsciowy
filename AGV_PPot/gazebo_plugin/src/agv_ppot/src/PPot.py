@@ -154,11 +154,12 @@ vel_p_y = Roc_vel_0[0]*sin(Rob_pos_0[2])
 #######################################################################
 #APF Inputs
 Goal_Pos = [rospy.get_param("~x_Goal"),rospy.get_param("~y_Goal")]
-Obs_Pos = [rospy.get_param("~x_Obs1"),rospy.get_param("~y_Obs1"),rospy.get_param("~x_Obs2"),rospy.get_param("~y_Obs2"),rospy.get_param("~x_Obs3"),rospy.get_param("~y_Obs3"),rospy.get_param("~x_Obs_dash"),rospy.get_param("~y_Obs_dash"),rospy.get_param("~x_Obs4"),rospy.get_param("~y_Obs4"), rospy.get_param("~x_Obs5"),rospy.get_param("~y_Obs5"), rospy.get_param("~x_Obs6"),rospy.get_param("~y_Obs6"), rospy.get_param("~x_Obs7"),rospy.get_param("~y_Obs7"), rospy.get_param("~x_Obs8"),rospy.get_param("~y_Obs8")]
-
+#Obs_Pos = [rospy.get_param("~x_Obs1"),rospy.get_param("~y_Obs1"),rospy.get_param("~x_Obs2"),rospy.get_param("~y_Obs2"),rospy.get_param("~x_Obs3"),rospy.get_param("~y_Obs3"),rospy.get_param("~x_Obs_dash"),rospy.get_param("~y_Obs_dash"),rospy.get_param("~x_Obs4"),rospy.get_param("~y_Obs4"), rospy.get_param("~x_Obs5"),rospy.get_param("~y_Obs5"), rospy.get_param("~x_Obs6"),rospy.get_param("~y_Obs6"), rospy.get_param("~x_Obs7"),rospy.get_param("~y_Obs7"), rospy.get_param("~x_Obs8"),rospy.get_param("~y_Obs8")]
+Obs_Pos = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 dsafe=0.4
 
-APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep"),rospy.get_param("~q_star1") + dsafe, rospy.get_param("~q_star2")+dsafe,rospy.get_param("~q_star3")+dsafe,rospy.get_param("~q_star_dash")+ dsafe,rospy.get_param("~q_star4")+dsafe,rospy.get_param("~q_star5")+dsafe,rospy.get_param("~q_star6")+dsafe,rospy.get_param("~q_star7")+dsafe,rospy.get_param("~q_star8")+ dsafe] #[K_att,K_rep,q_star]
+#APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep"),rospy.get_param("~q_star1") + dsafe, rospy.get_param("~q_star2")+dsafe,rospy.get_param("~q_star3")+dsafe,rospy.get_param("~q_star_dash")+ dsafe,rospy.get_param("~q_star4")+dsafe,rospy.get_param("~q_star5")+dsafe,rospy.get_param("~q_star6")+dsafe,rospy.get_param("~q_star7")+dsafe,rospy.get_param("~q_star8")+ dsafe] #[K_att,K_rep,q_star]
+APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep"),0,0,0,0,0,0,0,0,0]
 #######################################################################
 #######################################################################
 #APF Equations
