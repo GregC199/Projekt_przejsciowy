@@ -22,8 +22,8 @@ import matplotlib.pyplot as plt
 from std_msgs.msg._Float64MultiArray import Float64MultiArray
 
 matplotlib.use('QT5Agg')
-#import rospy
-#rospy.init_node('talker', anonymous=True)
+import rospy
+rospy.init_node('talker', anonymous=True)
 
 class MplCanvas(Canvas):   
     def __init__(self):
@@ -1514,11 +1514,11 @@ class Ui_MainWindow(object):
         
         self.TxtXKursor.setText(str(self.kursor_x))
         self.TxtYKursor.setText(str(self.kursor_y))
-        '''
+        
         pub = rospy.Publisher('goal', Float64MultiArray, queue_size=10)
         data_to_send = Float64MultiArray()
         data_to_send.data = [self.kursor_x, self.kursor_y]
-        pub.publish(data_to_send)'''
+        pub.publish(data_to_send)
         
 
 if __name__ == "__main__":
