@@ -8,11 +8,12 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-
+import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 import numpy as np
 import math
 import matplotlib 
+from PyQt5.QtCore import QTimer
 from PyQt5.Qt import QVBoxLayout, QWidget, QMouseEvent, pyqtSignal
 
 from matplotlib.figure import Figure
@@ -20,6 +21,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as Canvas
 import matplotlib
 import matplotlib.pyplot as plt
 from std_msgs.msg._Float64MultiArray import Float64MultiArray
+from nav_msgs.msg import Odometry
 
 matplotlib.use('QT5Agg')
 import rospy
@@ -71,8 +73,13 @@ class MplWidget(QtWidgets.QWidget):
 class Ui_MainWindow(object):
     mapa_init = 0
     
-    kursor_x = 0
-    kursor_y = 0
+    kursor_x = 0.0
+    kursor_y = 0.0
+    
+    rob_x = 0.0
+    rob_y = 0.0
+    
+    timer = QTimer()
     
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -1483,7 +1490,21 @@ class Ui_MainWindow(object):
         self.Wyrysuj_mape()
         self.sc.mouse_pressed.connect(self.Pobierz_pozycje)
         
+        time.sleep(10)
+        self.timer.timeout.connect(self.Pobierz_pozycje_robota)
+        self.timer.setInterval(100)
+        self.timer.start()
         
+    def callback(self, data):
+        msg = data
+        self.rob_x = round(msg.pose.pose.position.x, 2)        #Round the value of x to 4 decimal places
+        self.rob_y = round(msg.pose.pose.position.y, 2)        #Round the value of y to 4 decimal places 
+        self.TxtXRobot.setText(str(self.rob_x))
+        self.TxtYRobot.setText(str(self.rob_y))
+        
+    def Pobierz_pozycje_robota(self):
+        sub = rospy.Subscriber('/odom', Odometry, self.callback)
+         
     def Wyrysuj_mape(self):
         
         if self.mapa_init == 0:
@@ -1494,13 +1515,16 @@ class Ui_MainWindow(object):
             self.sc = MplWidget(self.MapaWidget)
             self.layout.addWidget(self.sc)
             self.MapaWidget.setLayout(self.layout)
+            self.sc.canvas.ax._set_view((-10.0, 10.0, -10.0, 10.0))
         else:
             self.sc.canvas.ax.cla()
-            
-        x1 = np.linspace(-10, 10, 500)
-        y1 = np.linspace(-10, 10, 500)
-        
-        self.sc.canvas.ax.plot(x1, y1,'r',linewidth=1.5)
+            self.sc.canvas.ax._set_view((-10.0, 10.0, -10.0, 10.0))
+        self.sc.canvas.ax.plot(self.rob_x, self.rob_y,'bo',linewidth=1.5)
+        self.sc.canvas.ax.plot(self.kursor_x, self.kursor_y,'gx',linewidth=1.5)
+        '''self.sc.canvas.ax.plot([-10, 10],[10, 10], 'r',linewidth=1.5)
+        self.sc.canvas.ax.plot([-10, 10],[-10, -10], 'r',linewidth=1.5)
+        self.sc.canvas.ax.plot([-10, -10],[-10, 10], 'r',linewidth=1.5)
+        self.sc.canvas.ax.plot([10, 10],[-10, 10], 'r',linewidth=1.5)'''
         
         if self.mapa_init == 0:
             self.sc.canvas.draw()
@@ -1514,6 +1538,8 @@ class Ui_MainWindow(object):
         
         self.TxtXKursor.setText(str(self.kursor_x))
         self.TxtYKursor.setText(str(self.kursor_y))
+        
+        self.Wyrysuj_mape()
         
         pub = rospy.Publisher('goal', Float64MultiArray, queue_size=400)
         data_to_send = Float64MultiArray()
