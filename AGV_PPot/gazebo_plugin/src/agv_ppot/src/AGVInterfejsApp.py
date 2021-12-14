@@ -1515,16 +1515,16 @@ class Ui_MainWindow(object):
             self.sc = MplWidget(self.MapaWidget)
             self.layout.addWidget(self.sc)
             self.MapaWidget.setLayout(self.layout)
-            self.sc.canvas.ax._set_view((-10.0, 10.0, -10.0, 10.0))
+            self.sc.canvas.ax._set_view((-10.5, 10.5, -10.5, 10.5))
         else:
             self.sc.canvas.ax.cla()
-            self.sc.canvas.ax._set_view((-10.0, 10.0, -10.0, 10.0))
+            self.sc.canvas.ax._set_view((-10.5, 10.5, -10.5, 10.5))
         self.sc.canvas.ax.plot(self.rob_x, self.rob_y,'bo',linewidth=1.5)
         self.sc.canvas.ax.plot(self.kursor_x, self.kursor_y,'gx',linewidth=1.5)
-        '''self.sc.canvas.ax.plot([-10, 10],[10, 10], 'r',linewidth=1.5)
+        self.sc.canvas.ax.plot([-10, 10],[10, 10], 'r',linewidth=1.5)
         self.sc.canvas.ax.plot([-10, 10],[-10, -10], 'r',linewidth=1.5)
         self.sc.canvas.ax.plot([-10, -10],[-10, 10], 'r',linewidth=1.5)
-        self.sc.canvas.ax.plot([10, 10],[-10, 10], 'r',linewidth=1.5)'''
+        self.sc.canvas.ax.plot([10, 10],[-10, 10], 'r',linewidth=1.5)
         
         if self.mapa_init == 0:
             self.sc.canvas.draw()
