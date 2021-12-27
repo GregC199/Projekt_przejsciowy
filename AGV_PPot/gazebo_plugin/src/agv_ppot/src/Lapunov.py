@@ -9,6 +9,8 @@ import numpy as np
 import math
 import sympy as sym
 from sympy import *
+from roslib.manifest import manifest_file
+from std_msgs.msg._Bool import Bool
 #########################################################################################################
 
 #########################################################################################################
@@ -22,8 +24,16 @@ rospy.init_node('Lyapunov_Pos_Control', anonymous=True) #Identify ROS Node
 pub1 = rospy.Publisher('/cmd_vel', Twist, queue_size=10) #Identify the publisher "pub1" to publish on topic "/cmd_vel" to send message of type "Twist"
 vel_msg = Twist() #Identify msg variable of data type Twist
 rate = rospy.Rate(10) # rate of publishing msg 10hz
+manual_mode = False
 #######################################################################
-
+#Download of operating mode
+def operating_mode(data):
+    global sub01
+    global manual_mode
+    
+    manual_mode = data
+    
+sub01 = rospy.Subscriber('opertaing_mode', Bool, operating_mode)
 #######################################################################
 def quaternion_to_euler(x, y, z, w):
     t0 = +2.0 * (w * x + y * z)
@@ -165,29 +175,33 @@ def Lyapunov_Control(Rob_pos,Rob_pos_des):
 #Simulation While Loop
 
 while 1 and not rospy.is_shutdown():
-    if flag_cont == 1 and flag_cont_1 == 1:
-        #Get Robot Current Position and Velocity
-        Rob_pos = [position[0],position[1],position[3]]
-        Rob_pos_des = [position_des[0],position_des[1],position_des[3]]
-        
-        #Calculate the control effort from the Lyaponov-based position control law	
-        Cont_input = Lyapunov_Control(Rob_pos,Rob_pos_des)
-        
-        flag_cont = 0
-        flag_cont_1 = 0
+    if manual_mode == True:
+        rate.sleep()        #Sleep with rate
     else:
+        if flag_cont == 1 and flag_cont_1 == 1:
+            #Get Robot Current Position and Velocity
+            Rob_pos = [position[0],position[1],position[3]]
+            Rob_pos_des = [position_des[0],position_des[1],position_des[3]]
+            
+            #Calculate the control effort from the Lyaponov-based position control law	
+            Cont_input = Lyapunov_Control(Rob_pos,Rob_pos_des)
+            
+            flag_cont = 0
+            flag_cont_1 = 0
+        else:
+            #Set the values of the Twist msg to be publeshed
+            Cont_input = [0,0]
+    
+        v = round(float(Cont_input[0]),2) 	#Linear Velocity	
+        w = round(float(Cont_input[1]),2)	#Angular Velocity
         #Set the values of the Twist msg to be publeshed
-        Cont_input = [0,0]
-
-    v = round(float(Cont_input[0]),2) 	#Linear Velocity	
-    w = round(float(Cont_input[1]),2)	#Angular Velocity
-    #Set the values of the Twist msg to be publeshed
-    vel_msg.linear.x = v #Linear Velocity
-    vel_msg.linear.y = 0
-    vel_msg.linear.z = 0
-    vel_msg.angular.x = 0
-    vel_msg.angular.y = 0
-    vel_msg.angular.z = w #Angular Velocity
-    pub1.publish(vel_msg)	#Publish msg
-    rate.sleep()		#Sleep with rate
+        vel_msg.linear.x = v #Linear Velocity
+        vel_msg.linear.y = 0
+        vel_msg.linear.z = 0
+        vel_msg.angular.x = 0
+        vel_msg.angular.y = 0
+        vel_msg.angular.z = w #Angular Velocity
+        
+        pub1.publish(vel_msg)	#Publish msg
+        rate.sleep()		#Sleep with rate
 #########################################################################################################

@@ -21,6 +21,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as Canvas
 import matplotlib
 import matplotlib.pyplot as plt
 from std_msgs.msg._Float64MultiArray import Float64MultiArray
+from std_msgs.msg._Bool import Bool
 from nav_msgs.msg import Odometry
 
 matplotlib.use('QT5Agg')
@@ -80,6 +81,10 @@ class Ui_MainWindow(object):
     rob_y = 0.0
     
     timer = QTimer()
+    
+    tryb_reczny = Bool()
+    
+    pub_mode = rospy.Publisher('opertaing_mode', Bool, queue_size=400)
     
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -1494,7 +1499,39 @@ class Ui_MainWindow(object):
         self.timer.timeout.connect(self.Pobierz_pozycje_robota)
         self.timer.setInterval(100)
         self.timer.start()
+        self.pushButton_2.clicked.connect(self.click_auto)
+        self.pushButton.clicked.connect(self.click_manual)
         
+        self.ButtonPredkoscMinus.setEnabled(False)
+        self.ButtonPredkoscPlus.setEnabled(False)
+        self.ButtonSkretLewo.setEnabled(False)
+        self.ButtonSkretPrawo.setEnabled(False)
+        self.pushButton_2.setEnabled(False)
+        
+    def click_auto(self):
+        self.tryb_reczny.data = False
+
+        self.ButtonPredkoscMinus.setEnabled(False)
+        self.ButtonPredkoscPlus.setEnabled(False)
+        self.ButtonSkretLewo.setEnabled(False)
+        self.ButtonSkretPrawo.setEnabled(False)
+        self.pushButton_2.setEnabled(False)
+        self.pushButton.setEnabled(True)
+        
+        self.pub_mode.publish(self.tryb_reczny)
+        
+    def click_manual(self):
+        self.tryb_reczny.data = True
+        
+        self.ButtonPredkoscMinus.setEnabled(True)
+        self.ButtonPredkoscPlus.setEnabled(True)
+        self.ButtonSkretLewo.setEnabled(True)
+        self.ButtonSkretPrawo.setEnabled(True)
+        self.pushButton.setEnabled(False)
+        self.pushButton_2.setEnabled(True)
+        
+        self.pub_mode.publish(self.tryb_reczny)
+                
     def callback(self, data):
         msg = data
         self.rob_x = round(msg.pose.pose.position.x, 2)        #Round the value of x to 4 decimal places
@@ -1533,18 +1570,19 @@ class Ui_MainWindow(object):
             self.sc.canvas.draw_idle()
     
     def Pobierz_pozycje(self):
-        self.kursor_x = self.sc.mouse_x
-        self.kursor_y = self.sc.mouse_y
-        
-        self.TxtXKursor.setText(str(self.kursor_x))
-        self.TxtYKursor.setText(str(self.kursor_y))
-        
-        self.Wyrysuj_mape()
-        
-        pub = rospy.Publisher('goal', Float64MultiArray, queue_size=400)
-        data_to_send = Float64MultiArray()
-        data_to_send.data = [self.kursor_x, self.kursor_y]
-        pub.publish(data_to_send)
+        if self.tryb_reczny.data == False:
+            self.kursor_x = self.sc.mouse_x
+            self.kursor_y = self.sc.mouse_y
+            
+            self.TxtXKursor.setText(str(self.kursor_x))
+            self.TxtYKursor.setText(str(self.kursor_y))
+            
+            self.Wyrysuj_mape()
+            
+            pub = rospy.Publisher('goal', Float64MultiArray, queue_size=400)
+            data_to_send = Float64MultiArray()
+            data_to_send.data = [self.kursor_x, self.kursor_y]
+            pub.publish(data_to_send)
         
 
 if __name__ == "__main__":

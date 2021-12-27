@@ -7,9 +7,4 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/devel:$CMAKE_PREFIX_PATH"
-export LD_LIBRARY_PATH="/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/devel/lib:$LD_LIBRARY_PATH"
-export PKG_CONFIG_PATH="/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/devel/lib/pkgconfig:$PKG_CONFIG_PATH"
 export PWD='/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build'
-export ROSLISP_PACKAGE_DIRECTORIES='/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/devel/share/common-lisp'
-export ROS_PACKAGE_PATH="/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/src:/home/greg/Pulpit/AGV_PPot/gazebo_plugin/src:$ROS_PACKAGE_PATH"
