@@ -25,6 +25,11 @@ rospy.init_node('Path_Planning_APF', anonymous=True) #Identify ROS Node
 pub1 = rospy.Publisher('/APF_Des_Pos', Pose, queue_size=10) #Identify the publisher "pub1" to publish on topic "/APF_Des_Pos" to send message of type "Pose"
 Des_Pos_msg = Pose() #Identify msg variable of data type Twist
 rate = rospy.Rate(10) # rate of publishing msg 10hz
+Obs_Pos = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] #Placeholder
+dsafe=0.4 # Safe distance
+APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep"),0,0,0,0,0,0,0,0,0] #Reinforcement attraction, repulsion
+tau = rospy.get_param("~sampling_time") #Sampling Time
+rob_mass = rospy.get_param("~rob_mass") #Robot Mass (Turtlebot 3 Waffle_pi)
 #######################################################################
 
 #######################################################################
@@ -153,7 +158,7 @@ vel_p_y = Roc_vel_0[0]*sin(Rob_pos_0[2])
 
 #########################################################################################################
 #######################################################################
-#APF Inputs
+#APF Inputs - Goal function
 goal_data = [0.0,0.0]
 def get_Goal(data):
     global goal_data
@@ -165,11 +170,11 @@ sub_goal=rospy.Subscriber('goal', Float64MultiArray, get_Goal)      #Identify th
 Goal_Pos = goal_data
 #Goal_Pos = [rospy.get_param("~x_Goal"),rospy.get_param("~y_Goal")]
 #Obs_Pos = [rospy.get_param("~x_Obs1"),rospy.get_param("~y_Obs1"),rospy.get_param("~x_Obs2"),rospy.get_param("~y_Obs2"),rospy.get_param("~x_Obs3"),rospy.get_param("~y_Obs3"),rospy.get_param("~x_Obs_dash"),rospy.get_param("~y_Obs_dash"),rospy.get_param("~x_Obs4"),rospy.get_param("~y_Obs4"), rospy.get_param("~x_Obs5"),rospy.get_param("~y_Obs5"), rospy.get_param("~x_Obs6"),rospy.get_param("~y_Obs6"), rospy.get_param("~x_Obs7"),rospy.get_param("~y_Obs7"), rospy.get_param("~x_Obs8"),rospy.get_param("~y_Obs8")]
-Obs_Pos = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+'''Obs_Pos = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 dsafe=0.4
-
+APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep"),0,0,0,0,0,0,0,0,0]'''
 #APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep"),rospy.get_param("~q_star1") + dsafe, rospy.get_param("~q_star2")+dsafe,rospy.get_param("~q_star3")+dsafe,rospy.get_param("~q_star_dash")+ dsafe,rospy.get_param("~q_star4")+dsafe,rospy.get_param("~q_star5")+dsafe,rospy.get_param("~q_star6")+dsafe,rospy.get_param("~q_star7")+dsafe,rospy.get_param("~q_star8")+ dsafe] #[K_att,K_rep,q_star]
-APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep"),0,0,0,0,0,0,0,0,0]
+#APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep"),0,0,0,0,0,0,0,0,0]
 #######################################################################
 #######################################################################
 #APF Equations
@@ -179,7 +184,7 @@ x_goal = symbols('x_goal')
 y_goal = symbols('y_goal')
 x_obs = symbols('x_obs')
 y_obs = symbols('y_obs')
-qstar= symbols('qstar')
+qstar = symbols('qstar')
 
 #Attraction Forces Equations
 Fx_att = -APF_Param[0]*(x_rob-x_goal)
@@ -223,8 +228,6 @@ def APF_Fn(Rob_pos,Goal_pos,Obs_pos,APF_Param):
 
 #########################################################################################################
 #Simulation While Loop
-tau = rospy.get_param("~tau") #Sampling Time
-rob_mass = rospy.get_param("~rob_mass") #Robot Mass (Turtlebot 3 Waffle_pi)
 
 while 1 and not rospy.is_shutdown():
     if flag_cont == 1:
