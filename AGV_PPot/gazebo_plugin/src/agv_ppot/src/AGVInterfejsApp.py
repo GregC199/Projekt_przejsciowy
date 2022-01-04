@@ -84,7 +84,7 @@ class Ui_MainWindow(object):
     
     tryb_reczny = Bool()
     
-    pub_mode = rospy.Publisher('opertaing_mode', Bool, queue_size=400)
+    pub_mode = rospy.Publisher('opertaing_mode', Bool, queue_size=800)
     
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -1552,10 +1552,10 @@ class Ui_MainWindow(object):
             self.sc = MplWidget(self.MapaWidget)
             self.layout.addWidget(self.sc)
             self.MapaWidget.setLayout(self.layout)
-            self.sc.canvas.ax._set_view((-10.5, 10.5, -10.5, 10.5))
+            self.sc.canvas.ax._set_view((10.5, -10.5, -10.5, 10.5))
         else:
             self.sc.canvas.ax.cla()
-            self.sc.canvas.ax._set_view((-10.5, 10.5, -10.5, 10.5))
+            self.sc.canvas.ax._set_view((10.5, -10.5, -10.5, 10.5))
         self.sc.canvas.ax.plot(self.rob_x, self.rob_y,'bo',linewidth=1.5)
         self.sc.canvas.ax.plot(self.kursor_x, self.kursor_y,'gx',linewidth=1.5)
         self.sc.canvas.ax.plot([-10, 10],[10, 10], 'r',linewidth=1.5)
@@ -1574,6 +1574,16 @@ class Ui_MainWindow(object):
             self.kursor_x = self.sc.mouse_x
             self.kursor_y = self.sc.mouse_y
             
+            if (self.kursor_x < -9.85 ):
+                self.kursor_x = -9.85
+            if (self.kursor_x > 9.85 ):
+                self.kursor_x = 9.85
+                
+            if (self.kursor_y < -9.85 ):
+                self.kursor_y = -9.85
+            if (self.kursor_y > 9.85 ):
+                self.kursor_y = 9.85
+                
             self.TxtXKursor.setText(str(self.kursor_x))
             self.TxtYKursor.setText(str(self.kursor_y))
             

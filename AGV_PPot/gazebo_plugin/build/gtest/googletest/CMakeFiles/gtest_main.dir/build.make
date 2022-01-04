@@ -43,7 +43,7 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/greg/Pulpit/AGV_PPot/gazebo_plugin/src
+CMAKE_SOURCE_DIR = /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/src
 
 # The top-level build directory on which CMake was run.
 CMAKE_BINARY_DIR = /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build
@@ -94,6 +94,6 @@ gtest/googletest/CMakeFiles/gtest_main.dir/clean:
 .PHONY : gtest/googletest/CMakeFiles/gtest_main.dir/clean
 
 gtest/googletest/CMakeFiles/gtest_main.dir/depend:
-	cd /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/greg/Pulpit/AGV_PPot/gazebo_plugin/src /usr/src/googletest/googletest /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build/gtest/googletest /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build/gtest/googletest/CMakeFiles/gtest_main.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/src /usr/src/googletest/googletest /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build/gtest/googletest /home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/build/gtest/googletest/CMakeFiles/gtest_main.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : gtest/googletest/CMakeFiles/gtest_main.dir/depend
 

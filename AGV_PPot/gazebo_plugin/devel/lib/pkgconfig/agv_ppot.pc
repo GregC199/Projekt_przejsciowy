@@ -1,4 +1,4 @@
-prefix=/home/greg/Pulpit/AGV_PPot/gazebo_plugin/devel
+prefix=/home/greg/git/Projekt_przejsciowy/AGV_PPot/gazebo_plugin/devel
 
 Name: agv_ppot
 Description: Description of agv_ppot

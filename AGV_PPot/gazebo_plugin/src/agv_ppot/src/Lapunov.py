@@ -31,7 +31,8 @@ def operating_mode(data):
     global sub01
     global manual_mode
     
-    manual_mode = data
+    msg = data
+    manual_mode = msg.data
     
 sub01 = rospy.Subscriber('opertaing_mode', Bool, operating_mode)
 #######################################################################
