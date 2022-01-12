@@ -18,7 +18,7 @@ from std_msgs.msg._Bool import Bool
 #Initialize ROS Node
 rospy.init_node('Lyapunov_Pos_Control', anonymous=True) #Identify ROS Node
 #######################################################################
-Rate_rob = 5
+Rate_rob = 10
 #######################################################################
 #ROS Publisher Code for Velocity
 pub1 = rospy.Publisher('/cmd_vel', Twist, queue_size=10) #Identify the publisher "pub1" to publish on topic "/cmd_vel" to send message of type "Twist"
@@ -167,7 +167,8 @@ def Lyapunov_Control(Rob_pos,Rob_pos_des):
     
     #Evaluate Control Law
     linear_v = K[0]*err_l[0][0] + Cont_input_des[0]*cos(err_l[2][0]) #Linear Velocity
-    angular_v = K[1]*sin(err_l[2][0]) + Cont_input_des[0]*err_l[1][0] +Cont_input_des[1] #Angular Velocity
+    angular_v = K[1]*sin(err_l[2][0]) + Cont_input_des[0]*err_l[1][0] + Cont_input_des[1] #Angular Velocity
+    
     Cont_input = [linear_v,angular_v]
     return Cont_input
 #########################################################################################################

@@ -23,7 +23,7 @@ APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep")] #Reinforcement
 tau = rospy.get_param("~sampling_time") #Sampling Time
 rob_mass = rospy.get_param("~rob_mass") #Robot Mass (Turtlebot 3 Waffle_pi)
 
-Rob_rate = 5
+Rob_rate = 10
 #######################################################################
 #ROS Publisher Code for Velocity
 pub1 = rospy.Publisher('/APF_Des_Pos', Pose, queue_size=10) #Identify the publisher "pub1" to publish on topic "/APF_Des_Pos" to send message of type "Pose"
@@ -33,7 +33,7 @@ Obs_Pos_x = [ -7.5,-5.5,-3.5,-1.5,  5.0,5.0,  -8.5, -7.5, -5.5, -4.5, -3.5, -1.5
 Obs_Pos_y = [ -6.0,-6.0,-6.0,-6.0,  -7.5,-4.5,  1.5, 7.5, 4.5, 7.5, 1.5, 2.5, 6.5, 0.5, 6.5, 1.5, 2.5, 4.5 ]
 Obs_len_x = [ 0.5,0.5,0.5,0.5,  3.0, 3.0,  0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5 ]
 Obs_len_y = [ 2.0,2.0,2.0,2.0,  0.5,0.5,  0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5 ]
-dsafe=1.0 # Safe distance
+dsafe=0.4 # Safe distance
 
 #######################################################################
 
@@ -194,8 +194,8 @@ obs_len_y = symbols('obs_len_y')
 D_obs = symbols('D_obs')
 
 #Attraction Forces Equations
-Fx_att = -APF_Param[0]*(x_rob-x_goal)
-Fy_att = -APF_Param[0]*(y_rob-y_goal)
+#Fx_att = -APF_Param[0]*(x_rob-x_goal)
+#Fy_att = -APF_Param[0]*(y_rob-y_goal)
 #Repulsion Forces Equations
 #d_obs = sqrt((x_rob-x_obs)**2 + (y_rob-y_obs)**2)
 #d_obs_x = sqrt((x_rob-x_obs)**2)
@@ -203,25 +203,27 @@ Fy_att = -APF_Param[0]*(y_rob-y_goal)
 
 #Fx_rep = -APF_Param[1]*((1/d_obs)-(1/((1/obs_len_x)+dsafe)))*(-(x_rob-x_obs)/(d_obs**3))
 #Fy_rep = -APF_Param[1]*((1/d_obs)-(1/((1/obs_len_y)+dsafe)))*(-(y_rob-y_obs)/(d_obs**3))
-Fx_rep = -APF_Param[1]*(1-(D_obs/(obs_len_x+dsafe)))*(-(x_rob-x_obs)/(D_obs**3))
-Fy_rep = -APF_Param[1]*(1-(D_obs/(obs_len_y+dsafe)))*(-(y_rob-y_obs)/(D_obs**3))
+#Fx_rep = -APF_Param[1]*(1-(D_obs/(obs_len_x+dsafe)))*(-(x_rob-x_obs)/(D_obs**3))
+#Fy_rep = -APF_Param[1]*(1-(D_obs/(obs_len_y+dsafe)))*(-(y_rob-y_obs)/(D_obs**3))
 #Fx_rep = -APF_Param[1]*((1/d_obs_x)-(1/obs_len_x))*(-(x_rob-x_obs)/(d_obs_x**3))
 #Fy_rep = -APF_Param[1]*((1/d_obs_y)-(1/obs_len_y))*(-(y_rob-y_obs)/(d_obs_y**3))
 #######################################################################
-def APF_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,APF_Param):
-    global Fx_att
-    global Fy_att
+def APF_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,APF_Param,dsafe,Obs_len_x,Obs_len_y):
+    #global Fx_att
+    #global Fy_att
     #global d_obs
     #global d_obs_x
     #global d_obs_y
-    global Fx_rep
-    global Fy_rep
-    global dsafe
-    global Obs_len_x
-    global Obs_len_y
+    #global Fx_rep
+    #global Fy_rep
+    #global dsafe
+    #global Obs_len_x
+    #global Obs_len_y
     
-    Fx_att_val = Fx_att.subs([(x_rob,Rob_pos[0]),(x_goal,Goal_pos[0])])
-    Fy_att_val = Fy_att.subs([(y_rob,Rob_pos[1]),(y_goal,Goal_pos[1])])
+    Fx_att_val = -APF_Param[0]*(Rob_pos[0]-Goal_pos[0])
+    Fy_att_val = -APF_Param[0]*(Rob_pos[1]-Goal_pos[1])
+    #Fx_att.subs([(x_rob,Rob_pos[0]),(x_goal,Goal_pos[0])])
+    #Fy_att_val = Fy_att.subs([(y_rob,Rob_pos[1]),(y_goal,Goal_pos[1])])
     Fx_rep_val=0.0
     Fy_rep_val=0.0
     j=0
@@ -231,10 +233,16 @@ def APF_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,APF_Param):
         d_obs_val_x = sqrt((Rob_pos[0]-Obs_pos_x[j])**2)
         d_obs_val_y = sqrt((Rob_pos[1]-Obs_pos_y[j])**2)
         
-        #if d_obs_val < :
-        if (d_obs_val_x < (Obs_len_x[j] + dsafe) and d_obs_val_y < (Obs_len_y[j] + dsafe)):
-            Fx_rep_val += Fx_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(D_obs,d_obs_val),(obs_len_x,Obs_len_x[j])])
-            Fy_rep_val += Fy_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(D_obs,d_obs_val),(obs_len_y,Obs_len_y[j])])
+        obs_r = sqrt(Obs_len_x[j]**2 + Obs_len_y[j]**2)
+        
+        #if d_obs_val < (obs_r + dsafe):
+        if ((d_obs_val_x < (Obs_len_x[j] + dsafe)) and (d_obs_val_y < (Obs_len_y[j] + dsafe))):
+            Fx_rep_val += -APF_Param[1]*(1-(d_obs_val/(Obs_len_x[j]+dsafe)))*(-(Rob_pos[0]-Obs_pos_x[j])/(d_obs_val**3))
+            Fy_rep_val += -APF_Param[1]*(1-(d_obs_val/(Obs_len_y[j]+dsafe)))*(-(Rob_pos[1]-Obs_pos_y[j])/(d_obs_val**3))
+            #Fx_rep_val += -APF_Param[1]*(1-(d_obs_val/(Obs_len_x[j]+dsafe)))*(-(Rob_pos[0]-Obs_pos_x[j])/(d_obs_val**3))
+            #Fy_rep_val += -APF_Param[1]*(1-(d_obs_val/(Obs_len_y[j]+dsafe)))*(-(Rob_pos[1]-Obs_pos_y[j])/(d_obs_val**3))
+            #Fx_rep_val += Fx_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(D_obs,d_obs_val),(obs_len_x,Obs_len_x[j])])
+            #Fy_rep_val += Fy_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(D_obs,d_obs_val),(obs_len_y,Obs_len_y[j])])
             #Fx_rep_val += Fx_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(d_obs_x,d_obs_val_x),(obs_len_x,Obs_len_x[j])])
             #Fy_rep_val += Fy_rep.subs([(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(d_obs_y,d_obs_val_y),(obs_len_y,Obs_len_y[j])])
         else:
@@ -263,7 +271,7 @@ while 1 and not rospy.is_shutdown():
         Rob_vel = [velocity[0],velocity[5]]
         
         #Implement Artificial Potential Field
-        F_xy_net = APF_Fn(Rob_pos,Goal_Pos,Obs_Pos_x,Obs_Pos_y,APF_Param)
+        F_xy_net = APF_Fn(Rob_pos,Goal_Pos,Obs_Pos_x,Obs_Pos_y,APF_Param,dsafe,Obs_len_x,Obs_len_y)
         F_net = float(sqrt(F_xy_net[0]**2 + F_xy_net[1]**2))
         F_net_direct = float(atan2(F_xy_net[1], F_xy_net[0]))
         
