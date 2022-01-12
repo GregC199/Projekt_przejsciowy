@@ -20,11 +20,11 @@
     <param name="x_Goal" value="0.0" />   
     <param name="y_Goal" value="0.0"/>
 
-    <param name="K_att" value="8" />   
-    <param name="K_rep" value="1000" /> 
+    <param name="K_att" value="2" />   
+    <param name="K_rep" value="60" /> 
 
     <param name="sampling_time" value="0.1" /> 
-    <param name="rob_mass" value="4.8" /> 
+    <param name="rob_mass" value="1.8" /> 
    </node>
 
   <node pkg="agv_ppot" name="Lapunov" type="Lapunov.py">
