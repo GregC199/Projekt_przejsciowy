@@ -33,7 +33,7 @@ Obs_Pos_x = [ -7.5,-5.5,-3.5,-1.5,  5.0,5.0,  -8.5, -7.5, -5.5, -4.5, -3.5, -1.5
 Obs_Pos_y = [ -6.0,-6.0,-6.0,-6.0,  -7.5,-4.5,  1.5, 7.5, 4.5, 7.5, 1.5, 2.5, 6.5, 0.5, 6.5, 1.5, 2.5, 4.5 ]
 Obs_len_x = [ 0.5,0.5,0.5,0.5,  3.0, 3.0,  0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5 ]
 Obs_len_y = [ 2.0,2.0,2.0,2.0,  0.5,0.5,  0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5 ]
-dsafe=0.4 # Safe distance
+dsafe=1.0 # Safe distance
 
 #######################################################################
 
@@ -191,26 +191,29 @@ x_obs = symbols('x_obs')
 y_obs = symbols('y_obs')
 obs_len_x = symbols('obs_len_x')
 obs_len_y = symbols('obs_len_y')
+D_obs = symbols('D_obs')
 
 #Attraction Forces Equations
 Fx_att = -APF_Param[0]*(x_rob-x_goal)
 Fy_att = -APF_Param[0]*(y_rob-y_goal)
 #Repulsion Forces Equations
 #d_obs = sqrt((x_rob-x_obs)**2 + (y_rob-y_obs)**2)
-d_obs_x = sqrt((x_rob-x_obs)**2)
-d_obs_y = sqrt((y_rob-y_obs)**2)
+#d_obs_x = sqrt((x_rob-x_obs)**2)
+#d_obs_y = sqrt((y_rob-y_obs)**2)
 
-#Fx_rep = -APF_Param[1]*((1/d_obs)-(1/obs_len_x))*(-(x_rob-x_obs)/(d_obs**3))
-#Fy_rep = -APF_Param[1]*((1/d_obs)-(1/obs_len_y))*(-(y_rob-y_obs)/(d_obs**3))
-Fx_rep = -APF_Param[1]*((1/d_obs_x)-(1/obs_len_x))*(-(x_rob-x_obs)/(d_obs_x**3))
-Fy_rep = -APF_Param[1]*((1/d_obs_y)-(1/obs_len_y))*(-(y_rob-y_obs)/(d_obs_y**3))
+#Fx_rep = -APF_Param[1]*((1/d_obs)-(1/((1/obs_len_x)+dsafe)))*(-(x_rob-x_obs)/(d_obs**3))
+#Fy_rep = -APF_Param[1]*((1/d_obs)-(1/((1/obs_len_y)+dsafe)))*(-(y_rob-y_obs)/(d_obs**3))
+Fx_rep = -APF_Param[1]*(1-(D_obs/(obs_len_x+dsafe)))*(-(x_rob-x_obs)/(D_obs**3))
+Fy_rep = -APF_Param[1]*(1-(D_obs/(obs_len_y+dsafe)))*(-(y_rob-y_obs)/(D_obs**3))
+#Fx_rep = -APF_Param[1]*((1/d_obs_x)-(1/obs_len_x))*(-(x_rob-x_obs)/(d_obs_x**3))
+#Fy_rep = -APF_Param[1]*((1/d_obs_y)-(1/obs_len_y))*(-(y_rob-y_obs)/(d_obs_y**3))
 #######################################################################
 def APF_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,APF_Param):
     global Fx_att
     global Fy_att
     #global d_obs
-    global d_obs_x
-    global d_obs_y
+    #global d_obs_x
+    #global d_obs_y
     global Fx_rep
     global Fy_rep
     global dsafe
@@ -224,14 +227,16 @@ def APF_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,APF_Param):
     j=0
     while j<18:
         #d_obs_val = d_obs.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j])])
-        d_obs_val_x = d_obs_x.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j])])
-        d_obs_val_y = d_obs_y.subs([(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j])])
+        d_obs_val = sqrt((Rob_pos[0]-Obs_pos_x[j])**2+(Rob_pos[1]-Obs_pos_y[j])**2)
+        d_obs_val_x = sqrt((Rob_pos[0]-Obs_pos_x[j])**2)
+        d_obs_val_y = sqrt((Rob_pos[1]-Obs_pos_y[j])**2)
         
+        #if d_obs_val < :
         if (d_obs_val_x < (Obs_len_x[j] + dsafe) and d_obs_val_y < (Obs_len_y[j] + dsafe)):
-            #Fx_rep_val += Fx_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(d_obs,d_obs_val),(obs_len_x,Obs_len_x[j])])
-            #Fy_rep_val += Fy_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(d_obs,d_obs_val),(obs_len_y,Obs_len_y[j])])
-            Fx_rep_val += Fx_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(d_obs_x,d_obs_val_x),(obs_len_x,Obs_len_x[j])])
-            Fy_rep_val += Fy_rep.subs([(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(d_obs_y,d_obs_val_y),(obs_len_y,Obs_len_y[j])])
+            Fx_rep_val += Fx_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(D_obs,d_obs_val),(obs_len_x,Obs_len_x[j])])
+            Fy_rep_val += Fy_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(D_obs,d_obs_val),(obs_len_y,Obs_len_y[j])])
+            #Fx_rep_val += Fx_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(d_obs_x,d_obs_val_x),(obs_len_x,Obs_len_x[j])])
+            #Fy_rep_val += Fy_rep.subs([(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(d_obs_y,d_obs_val_y),(obs_len_y,Obs_len_y[j])])
         else:
             Fx_rep_val += 0.0
             Fy_rep_val += 0.0
