@@ -80,6 +80,11 @@ class Ui_MainWindow(object):
     rob_x = 0.0
     rob_y = 0.0
     
+    poprzednie_rob_x = 0.0
+    poprzednie_rob_y = 0.0
+    odleglosc = 0.0
+    predkosc = 0.0
+    
     timer = QTimer()
     
     tryb_reczny = Bool()
@@ -89,8 +94,8 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(940, 760)
-        MainWindow.setMinimumSize(QtCore.QSize(940, 760))
-        MainWindow.setMaximumSize(QtCore.QSize(940, 760))
+        MainWindow.setMinimumSize(QtCore.QSize(1040, 840))
+        MainWindow.setMaximumSize(QtCore.QSize(1040, 840))
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -1118,7 +1123,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_11 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_11.setObjectName("horizontalLayout_11")
         self.FrameMapa = QtWidgets.QFrame(self.Tab_Ster)
-        self.FrameMapa.setMaximumSize(QtCore.QSize(514, 514))
+        self.FrameMapa.setMaximumSize(QtCore.QSize(654, 594))
         self.FrameMapa.setFrameShape(QtWidgets.QFrame.Box)
         self.FrameMapa.setFrameShadow(QtWidgets.QFrame.Raised)
         self.FrameMapa.setLineWidth(2)
@@ -1133,8 +1138,8 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.MapaWidget.sizePolicy().hasHeightForWidth())
         self.MapaWidget.setSizePolicy(sizePolicy)
-        self.MapaWidget.setMinimumSize(QtCore.QSize(500, 500))
-        self.MapaWidget.setMaximumSize(QtCore.QSize(500, 500))
+        self.MapaWidget.setMinimumSize(QtCore.QSize(640, 580))
+        self.MapaWidget.setMaximumSize(QtCore.QSize(640, 580))
         self.MapaWidget.setSizeIncrement(QtCore.QSize(0, 0))
         self.MapaWidget.setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
         self.MapaWidget.setMouseTracking(True)
@@ -1494,6 +1499,7 @@ class Ui_MainWindow(object):
     def UI_main(self):
         self.Wyrysuj_mape()
         self.sc.mouse_pressed.connect(self.Pobierz_pozycje)
+        self.sub_pozycja()
         
         time.sleep(10)
         self.timer.timeout.connect(self.Pobierz_pozycje_robota)
@@ -1534,14 +1540,23 @@ class Ui_MainWindow(object):
                 
     def callback(self, data):
         msg = data
-        self.rob_x = round(msg.pose.pose.position.x, 2)        #Round the value of x to 4 decimal places
-        self.rob_y = round(msg.pose.pose.position.y, 2)        #Round the value of y to 4 decimal places 
-        self.TxtXRobot.setText(str(self.rob_x))
-        self.TxtYRobot.setText(str(self.rob_y))
+        self.rob_x = round(msg.pose.pose.position.x, 8)        #Round the value of x to 2 decimal places
+        self.rob_y = round(msg.pose.pose.position.y, 8)        #Round the value of y to 2 decimal places 
+        
+    def sub_pozycja(self):
+        self.sub_poz = rospy.Subscriber('/odom', Odometry, self.callback)
         
     def Pobierz_pozycje_robota(self):
-        sub = rospy.Subscriber('/odom', Odometry, self.callback)
-         
+        self.odleglosc = (((self.rob_x - self.poprzednie_rob_x)**2 + (self.rob_y - self.poprzednie_rob_y)**2)**(1/2))
+        self.predkosc = round((self.odleglosc / 0.1), 4)
+        self.TxtXRobot.setText(str(round(self.rob_x, 1)))
+        self.TxtYRobot.setText(str(round(self.rob_y, 1)))
+        if self.predkosc < 0.01:
+            self.predkosc = 0.0
+        self.TxtPredkosc.setText(str(round(self.predkosc, 2)))
+        self.poprzednie_rob_x = self.rob_x
+        self.poprzednie_rob_y = self.rob_y
+        
     def Wyrysuj_mape(self):
         
         if self.mapa_init == 0:
@@ -1552,16 +1567,18 @@ class Ui_MainWindow(object):
             self.sc = MplWidget(self.MapaWidget)
             self.layout.addWidget(self.sc)
             self.MapaWidget.setLayout(self.layout)
-            self.sc.canvas.ax._set_view((10.5, -10.5, -10.5, 10.5))
         else:
             self.sc.canvas.ax.cla()
-            self.sc.canvas.ax._set_view((10.5, -10.5, -10.5, 10.5))
-        self.sc.canvas.ax.plot(self.rob_x, self.rob_y,'bo',linewidth=1.5)
-        self.sc.canvas.ax.plot(self.kursor_x, self.kursor_y,'gx',linewidth=1.5)
+            
+        self.sc.canvas.ax._set_view((-10.5, 10.5, 10.5, -10.5))
+        self.sc.canvas.ax.plot(self.rob_y, self.rob_x,'bo',linewidth=1.5)
+        self.sc.canvas.ax.plot(self.kursor_y, self.kursor_x,'gx',linewidth=1.5)
         self.sc.canvas.ax.plot([-10, 10],[10, 10], 'r',linewidth=1.5)
         self.sc.canvas.ax.plot([-10, 10],[-10, -10], 'r',linewidth=1.5)
         self.sc.canvas.ax.plot([-10, -10],[-10, 10], 'r',linewidth=1.5)
         self.sc.canvas.ax.plot([10, 10],[-10, 10], 'r',linewidth=1.5)
+        self.sc.canvas.ax.set_xlabel("Y")
+        self.sc.canvas.ax.set_ylabel("X")
         
         if self.mapa_init == 0:
             self.sc.canvas.draw()
@@ -1571,8 +1588,8 @@ class Ui_MainWindow(object):
     
     def Pobierz_pozycje(self):
         if self.tryb_reczny.data == False:
-            self.kursor_x = self.sc.mouse_x
-            self.kursor_y = self.sc.mouse_y
+            self.kursor_x = self.sc.mouse_y
+            self.kursor_y = self.sc.mouse_x
             
             if (self.kursor_x < -9.85 ):
                 self.kursor_x = -9.85
@@ -1584,8 +1601,8 @@ class Ui_MainWindow(object):
             if (self.kursor_y > 9.85 ):
                 self.kursor_y = 9.85
                 
-            self.TxtXKursor.setText(str(self.kursor_x))
-            self.TxtYKursor.setText(str(self.kursor_y))
+            self.TxtXKursor.setText(str(round(self.kursor_x, 1)))
+            self.TxtYKursor.setText(str(round(self.kursor_y, 1)))
             
             self.Wyrysuj_mape()
             

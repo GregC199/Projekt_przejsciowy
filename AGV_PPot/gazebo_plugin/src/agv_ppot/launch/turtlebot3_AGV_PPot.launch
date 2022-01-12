@@ -20,10 +20,10 @@
     <param name="x_Goal" value="0.0" />   
     <param name="y_Goal" value="0.0"/>
 
-    <param name="K_att" value="16" />   
+    <param name="K_att" value="50" />   
     <param name="K_rep" value="300" /> 
 
-    <param name="sampling_time" value="0.1" /> 
+    <param name="sampling_time" value="0.05" /> 
     <param name="rob_mass" value="1.8" /> 
    </node>
 

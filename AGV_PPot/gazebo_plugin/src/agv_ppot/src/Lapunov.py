@@ -18,12 +18,12 @@ from std_msgs.msg._Bool import Bool
 #Initialize ROS Node
 rospy.init_node('Lyapunov_Pos_Control', anonymous=True) #Identify ROS Node
 #######################################################################
-
+Rate_rob = 5
 #######################################################################
 #ROS Publisher Code for Velocity
 pub1 = rospy.Publisher('/cmd_vel', Twist, queue_size=10) #Identify the publisher "pub1" to publish on topic "/cmd_vel" to send message of type "Twist"
 vel_msg = Twist() #Identify msg variable of data type Twist
-rate = rospy.Rate(10) # rate of publishing msg 10hz
+rate = rospy.Rate(Rate_rob) # rate of publishing msg 10hz
 manual_mode = False
 #######################################################################
 #Download of operating mode

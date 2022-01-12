@@ -19,17 +19,22 @@ from std_msgs.msg._Float64MultiArray import Float64MultiArray
 #Initialize ROS Node
 rospy.init_node('Path_Planning_APF', anonymous=True) #Identify ROS Node
 #######################################################################
+APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep")] #Reinforcement attraction, repulsion
+tau = rospy.get_param("~sampling_time") #Sampling Time
+rob_mass = rospy.get_param("~rob_mass") #Robot Mass (Turtlebot 3 Waffle_pi)
 
+Rob_rate = 5
 #######################################################################
 #ROS Publisher Code for Velocity
 pub1 = rospy.Publisher('/APF_Des_Pos', Pose, queue_size=10) #Identify the publisher "pub1" to publish on topic "/APF_Des_Pos" to send message of type "Pose"
 Des_Pos_msg = Pose() #Identify msg variable of data type Twist
-rate = rospy.Rate(10) # rate of publishing msg 10hz
-Obs_Pos = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] #Placeholder
+rate = rospy.Rate(Rob_rate) # rate of publishing msg 20hz
+Obs_Pos_x = [ -7.5,-5.5,-3.5,-1.5,  5.0,5.0,  -8.5, -7.5, -5.5, -4.5, -3.5, -1.5, -1.5, 2.5, 4.5, 3.5, 4.5, 7.5 ]
+Obs_Pos_y = [ -6.0,-6.0,-6.0,-6.0,  -7.5,-4.5,  1.5, 7.5, 4.5, 7.5, 1.5, 2.5, 6.5, 0.5, 6.5, 1.5, 2.5, 4.5 ]
+Obs_len_x = [ 0.5,0.5,0.5,0.5,  3.0, 3.0,  0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5 ]
+Obs_len_y = [ 2.0,2.0,2.0,2.0,  0.5,0.5,  0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5 ]
 dsafe=0.4 # Safe distance
-APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep"),0,0,0,0,0,0,0,0,0] #Reinforcement attraction, repulsion
-tau = rospy.get_param("~sampling_time") #Sampling Time
-rob_mass = rospy.get_param("~rob_mass") #Robot Mass (Turtlebot 3 Waffle_pi)
+
 #######################################################################
 
 #######################################################################
@@ -184,39 +189,53 @@ x_goal = symbols('x_goal')
 y_goal = symbols('y_goal')
 x_obs = symbols('x_obs')
 y_obs = symbols('y_obs')
-qstar = symbols('qstar')
+obs_len_x = symbols('obs_len_x')
+obs_len_y = symbols('obs_len_y')
 
 #Attraction Forces Equations
 Fx_att = -APF_Param[0]*(x_rob-x_goal)
 Fy_att = -APF_Param[0]*(y_rob-y_goal)
 #Repulsion Forces Equations
-d_obs = sqrt((x_rob-x_obs)**2+(y_rob-y_obs)**2)
+#d_obs = sqrt((x_rob-x_obs)**2 + (y_rob-y_obs)**2)
+d_obs_x = sqrt((x_rob-x_obs)**2)
+d_obs_y = sqrt((y_rob-y_obs)**2)
 
-Fx_rep = -APF_Param[1]*((1/d_obs)-(1/qstar))*(-(x_rob-x_obs)/(d_obs**3))
-Fy_rep = -APF_Param[1]*((1/d_obs)-(1/qstar))*(-(y_rob-y_obs)/(d_obs**3))
+#Fx_rep = -APF_Param[1]*((1/d_obs)-(1/obs_len_x))*(-(x_rob-x_obs)/(d_obs**3))
+#Fy_rep = -APF_Param[1]*((1/d_obs)-(1/obs_len_y))*(-(y_rob-y_obs)/(d_obs**3))
+Fx_rep = -APF_Param[1]*((1/d_obs_x)-(1/obs_len_x))*(-(x_rob-x_obs)/(d_obs_x**3))
+Fy_rep = -APF_Param[1]*((1/d_obs_y)-(1/obs_len_y))*(-(y_rob-y_obs)/(d_obs_y**3))
 #######################################################################
-def APF_Fn(Rob_pos,Goal_pos,Obs_pos,APF_Param):
+def APF_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,APF_Param):
     global Fx_att
     global Fy_att
-    global d_obs
+    #global d_obs
+    global d_obs_x
+    global d_obs_y
     global Fx_rep
     global Fy_rep
+    global dsafe
+    global Obs_len_x
+    global Obs_len_y
     
     Fx_att_val = Fx_att.subs([(x_rob,Rob_pos[0]),(x_goal,Goal_pos[0])])
     Fy_att_val = Fy_att.subs([(y_rob,Rob_pos[1]),(y_goal,Goal_pos[1])])
-    Fx_rep_val=0
-    Fy_rep_val=0
-    i=0
+    Fx_rep_val=0.0
+    Fy_rep_val=0.0
     j=0
-    while j<9:
-        d_obs_val = d_obs.subs([(x_rob,Rob_pos[0]),(y_rob,Rob_pos[1]),(x_obs,Obs_pos[i]),(y_obs,Obs_pos[i+1])])
-        if d_obs_val<APF_Param[j+2]:
-            Fx_rep_val += Fx_rep.subs([(x_rob,Rob_pos[0]),(y_rob,Rob_pos[1]),(x_obs,Obs_pos[i]),(y_obs,Obs_pos[i+1]),(d_obs,d_obs_val),(qstar,APF_Param[j+2])])
-            Fy_rep_val += Fy_rep.subs([(x_rob,Rob_pos[0]),(y_rob,Rob_pos[1]),(x_obs,Obs_pos[i]),(y_obs,Obs_pos[i+1]),(d_obs,d_obs_val),(qstar,APF_Param[j+2])])
+    while j<18:
+        #d_obs_val = d_obs.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j])])
+        d_obs_val_x = d_obs_x.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j])])
+        d_obs_val_y = d_obs_y.subs([(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j])])
+        
+        if (d_obs_val_x < (Obs_len_x[j] + dsafe) and d_obs_val_y < (Obs_len_y[j] + dsafe)):
+            #Fx_rep_val += Fx_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(d_obs,d_obs_val),(obs_len_x,Obs_len_x[j])])
+            #Fy_rep_val += Fy_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(d_obs,d_obs_val),(obs_len_y,Obs_len_y[j])])
+            Fx_rep_val += Fx_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(d_obs_x,d_obs_val_x),(obs_len_x,Obs_len_x[j])])
+            Fy_rep_val += Fy_rep.subs([(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(d_obs_y,d_obs_val_y),(obs_len_y,Obs_len_y[j])])
         else:
-            Fx_rep_val += 0
-            Fy_rep_val += 0 
-        i +=2
+            Fx_rep_val += 0.0
+            Fy_rep_val += 0.0
+          
         j +=1
   
     Fx_net_val = Fx_att_val + Fx_rep_val
@@ -232,16 +251,16 @@ def APF_Fn(Rob_pos,Goal_pos,Obs_pos,APF_Param):
 while 1 and not rospy.is_shutdown():
     if flag_cont == 1:
         
-        sub_goal=rospy.Subscriber('goal', Float64MultiArray, get_Goal)      #Identify the subscriber "sub1" to subscribe topic "/odom" of type "Odometry"
+        sub_goal = rospy.Subscriber('goal', Float64MultiArray, get_Goal)      #Identify the subscriber "sub1" to subscribe topic "/odom" of type "Odometry"
         Goal_Pos = goal_data
         #Get Robot Current Position and Velocity
         Rob_pos = [position[0],position[1],position[3]]
         Rob_vel = [velocity[0],velocity[5]]
         
         #Implement Artificial Potential Field
-        F_xy_net = APF_Fn(Rob_pos,Goal_Pos,Obs_Pos,APF_Param)
-        F_net = float(sqrt(F_xy_net[0]**2+F_xy_net[1]**2))
-        F_net_direct = float(atan2(F_xy_net[1],F_xy_net[0]))
+        F_xy_net = APF_Fn(Rob_pos,Goal_Pos,Obs_Pos_x,Obs_Pos_y,APF_Param)
+        F_net = float(sqrt(F_xy_net[0]**2 + F_xy_net[1]**2))
+        F_net_direct = float(atan2(F_xy_net[1], F_xy_net[0]))
         
         #Calculate the desired robot position from the APF
         vel_c_x = vel_p_x + (F_xy_net[0]/rob_mass)*tau
