@@ -155,7 +155,7 @@ Rob_pos_0 = [position_0[0],position_0[1],position_0[3]]
 #########################################################################################################
 #Lyapunov Control (Position Control)
 ## For details about the Lyapunov control, you can chech the textbook (S. G. Tzafestas, Introduction to mobile robot control. Elsevier, 2013.)
-def Lyapunov_Control(Rob_pos,Rob_pos_des):
+def Lyapunov_Control(Rob_pos,Rob_pos_des,sign):
     #Lyapunov Parameters
     K = [rospy.get_param("~K_x"),rospy.get_param("~K_theta")] #Lyapunov Control Gains [K_x,K_theta]
     Cont_input_des = [rospy.get_param("~Vd_des"),rospy.get_param("~Omega_des")] #Desired Control Inputs [Vd_des,Omega_des] 
@@ -167,12 +167,12 @@ def Lyapunov_Control(Rob_pos,Rob_pos_des):
     
     #Evaluate Control Law
     linear_v = K[0]*err_l[0][0] + Cont_input_des[0]*cos(err_l[2][0]) #Linear Velocity
-    angular_v = K[1]*sin(err_l[2][0]) + Cont_input_des[0]*err_l[1][0] + Cont_input_des[1] #Angular Velocity
+    angular_v = K[1]*sin(err_l[2][0]) + Cont_input_des[0]*err_l[1][0] + sign*Cont_input_des[1] #Angular Velocity
     
     Cont_input = [linear_v,angular_v]
     return Cont_input
 #########################################################################################################
-
+sign = 1
 #########################################################################################################
 #Simulation While Loop
 
@@ -186,7 +186,12 @@ while 1 and not rospy.is_shutdown():
             Rob_pos_des = [position_des[0],position_des[1],position_des[3]]
             
             #Calculate the control effort from the Lyaponov-based position control law	
-            Cont_input = Lyapunov_Control(Rob_pos,Rob_pos_des)
+            Cont_input = Lyapunov_Control(Rob_pos,Rob_pos_des, sign)
+            
+            if sign == 1:
+                sign = -1
+            else:
+                sign = 1
             
             flag_cont = 0
             flag_cont_1 = 0
