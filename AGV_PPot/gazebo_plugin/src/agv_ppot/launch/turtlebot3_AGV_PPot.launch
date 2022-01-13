@@ -21,7 +21,7 @@
     <param name="y_Goal" value="0.0"/>
 
     <param name="K_att" value="28" />   
-    <param name="K_rep" value="650" /> 
+    <param name="K_rep" value="200" /> 
 
     <param name="sampling_time" value="0.1" /> 
     <param name="rob_mass" value="1.8" /> 
