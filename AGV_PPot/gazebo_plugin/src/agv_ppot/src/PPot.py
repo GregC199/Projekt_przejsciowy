@@ -33,8 +33,8 @@ Obs_Pos_x = [ -7.5,-5.5,-3.5,-1.5,  5.0,5.0,  -8.5, -7.5, -5.5, -4.5, -3.5, -1.5
 Obs_Pos_y = [ -6.0,-6.0,-6.0,-6.0,  -7.5,-4.5,  1.5, 7.5, 4.5, 7.5, 1.5, 2.5, 6.5, 0.5, 6.5, 1.5, 2.5, 4.5 ]
 Obs_len_x = [ 0.5,0.5,0.5,0.5,  3.0, 3.0,  0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5 ]
 Obs_len_y = [ 2.0,2.0,2.0,2.0,  0.5,0.5,  0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5 ]
-dsafe=0.33 # Safe distance
-dprewarn=0.66 # Prewarn distance
+dsafe=0.36 # Safe distance
+dprewarn=0.7 # Prewarn distance
 
 
 #######################################################################
@@ -173,15 +173,8 @@ def get_Goal(data):
     goal_data = data.data
     print(data.data)
        
-sub_goal=rospy.Subscriber('goal', Float64MultiArray, get_Goal)      #Identify the subscriber "sub1" to subscribe topic "/odom" of type "Odometry"
+sub_goal = rospy.Subscriber('goal', Float64MultiArray, get_Goal)      #Identify the subscriber "sub1" to subscribe topic "/odom" of type "Odometry"
 Goal_Pos = goal_data
-#Goal_Pos = [rospy.get_param("~x_Goal"),rospy.get_param("~y_Goal")]
-#Obs_Pos = [rospy.get_param("~x_Obs1"),rospy.get_param("~y_Obs1"),rospy.get_param("~x_Obs2"),rospy.get_param("~y_Obs2"),rospy.get_param("~x_Obs3"),rospy.get_param("~y_Obs3"),rospy.get_param("~x_Obs_dash"),rospy.get_param("~y_Obs_dash"),rospy.get_param("~x_Obs4"),rospy.get_param("~y_Obs4"), rospy.get_param("~x_Obs5"),rospy.get_param("~y_Obs5"), rospy.get_param("~x_Obs6"),rospy.get_param("~y_Obs6"), rospy.get_param("~x_Obs7"),rospy.get_param("~y_Obs7"), rospy.get_param("~x_Obs8"),rospy.get_param("~y_Obs8")]
-'''Obs_Pos = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-dsafe=0.4
-APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep"),0,0,0,0,0,0,0,0,0]'''
-#APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep"),rospy.get_param("~q_star1") + dsafe, rospy.get_param("~q_star2")+dsafe,rospy.get_param("~q_star3")+dsafe,rospy.get_param("~q_star_dash")+ dsafe,rospy.get_param("~q_star4")+dsafe,rospy.get_param("~q_star5")+dsafe,rospy.get_param("~q_star6")+dsafe,rospy.get_param("~q_star7")+dsafe,rospy.get_param("~q_star8")+ dsafe] #[K_att,K_rep,q_star]
-#APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep"),0,0,0,0,0,0,0,0,0]
 #######################################################################
 #######################################################################
 #APF Equations
@@ -196,56 +189,28 @@ obs_len_y = symbols('obs_len_y')
 D_obs = symbols('D_obs')
 
 #Attraction Forces Equations
-#Fx_att = -APF_Param[0]*(x_rob-x_goal)
-#Fy_att = -APF_Param[0]*(y_rob-y_goal)
-#Repulsion Forces Equations
-#d_obs = sqrt((x_rob-x_obs)**2 + (y_rob-y_obs)**2)
-#d_obs_x = sqrt((x_rob-x_obs)**2)
-#d_obs_y = sqrt((y_rob-y_obs)**2)
-
-#Fx_rep = -APF_Param[1]*((1/d_obs)-(1/((1/obs_len_x)+dsafe)))*(-(x_rob-x_obs)/(d_obs**3))
-#Fy_rep = -APF_Param[1]*((1/d_obs)-(1/((1/obs_len_y)+dsafe)))*(-(y_rob-y_obs)/(d_obs**3))
-#Fx_rep = -APF_Param[1]*(1-(D_obs/(obs_len_x+dsafe)))*(-(x_rob-x_obs)/(D_obs**3))
-#Fy_rep = -APF_Param[1]*(1-(D_obs/(obs_len_y+dsafe)))*(-(y_rob-y_obs)/(D_obs**3))
-#Fx_rep = -APF_Param[1]*((1/d_obs_x)-(1/obs_len_x))*(-(x_rob-x_obs)/(d_obs_x**3))
-#Fy_rep = -APF_Param[1]*((1/d_obs_y)-(1/obs_len_y))*(-(y_rob-y_obs)/(d_obs_y**3))
 #######################################################################
 def APF_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,APF_Param,dsafe,Obs_len_x,Obs_len_y):
-    #global Fx_att
-    #global Fy_att
-    #global d_obs
-    #global d_obs_x
-    #global d_obs_y
-    #global Fx_rep
-    #global Fy_rep
-    #global dsafe
-    #global Obs_len_x
-    #global Obs_len_y
     
     d_goal = sqrt((Rob_pos[0]-Goal_pos[0])**2+(Rob_pos[1]-Goal_pos[1])**2)
     
-    Fx_att_val = -(0.25+1.8/(d_goal+0.4))*APF_Param[0]*(Rob_pos[0]-Goal_pos[0])
-    Fy_att_val = -(0.25+1.8/(d_goal+0.4))*APF_Param[0]*(Rob_pos[1]-Goal_pos[1])
-    #Fx_att.subs([(x_rob,Rob_pos[0]),(x_goal,Goal_pos[0])])
-    #Fy_att_val = Fy_att.subs([(y_rob,Rob_pos[1]),(y_goal,Goal_pos[1])])
+    Fx_att_val = -(0.25+1.65/(d_goal+0.3))*APF_Param[0]*(Rob_pos[0]-Goal_pos[0])
+    Fy_att_val = -(0.25+1.65/(d_goal+0.3))*APF_Param[0]*(Rob_pos[1]-Goal_pos[1])
+
     Fx_rep_val=0.0
     Fy_rep_val=0.0
     j=0
     flaga = 0
-    #flaga_speed = 0
     
     d_obs_min = 20.0
-    #sign = -1
     
     
     
     while j<18:
-        #d_obs_val = d_obs.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j])])
-        '''d_obs_val = sqrt((Rob_pos[0]-Obs_pos_x[j]-Obs_len_x[j])**2+(Rob_pos[1]-Obs_pos_y[j]-Obs_len_y[j])**2)
-        d_obs_val_x = sqrt(Rob_pos[0]-Obs_pos_x[j]-Obs_len_x[j])**2)
-        d_obs_val_y = sqrt(Rob_pos[1]-Obs_pos_y[j]-Obs_len_y[j])**2)'''
         
-        d_obs_val = sqrt((Rob_pos[0]-Obs_pos_x[j])**2+(Rob_pos[1]-Obs_pos_y[j])**2)
+        Fx_rep_val_t = 0.0
+        Fy_rep_val_t = 0.0
+        
         d_obs_val_x = sqrt((Rob_pos[0]-Obs_pos_x[j])**2)
         d_obs_val_y = sqrt((Rob_pos[1]-Obs_pos_y[j])**2)
         
@@ -260,101 +225,36 @@ def APF_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,APF_Param,dsafe,Obs_len_x,Obs_le
             else:
                 d_obs_rob = sqrt((d_obs_val_x-Obs_len_x[j])**2+(d_obs_val_y-Obs_len_y[j])**2)
         
-        Fx_rep_val_t = 0.0
-        Fy_rep_val_t = 0.0
-        
-        obs_r = sqrt(Obs_len_x[j]**2 + Obs_len_y[j]**2)
-        
+
         if d_obs_rob < d_obs_min:
             d_obs_min = d_obs_rob
         
-        #if d_obs_val < (obs_r + dsafe):
-        #if ((d_obs_val < dprewarn) and (d_obs_val >= dsafe)):
-        #if (d_obs_val_x < (dprewarn + Obs_len_x[j]) and d_obs_val_y < (dprewarn + Obs_len_y[j])):
         if d_obs_rob < dprewarn:
-            #Fx_rep_val_t = -APF_Param[1]*(1-(d_obs_val/(dprewarn+obs_r)))*((Rob_pos[0]-Obs_pos_x[j]-Obs_len_x[j])/(d_obs_val**3))
-            #Fy_rep_val_t = -APF_Param[1]*(1-(d_obs_val/(dprewarn_obs_r)))*((Rob_pos[1]-Obs_pos_y[j]-Obs_len_y[j])/(d_obs_val**3))
-            #Fx_rep_val_t = 1.2*APF_Param[1]*(1-((d_obs_val-obs_r)/dprewarn))*((Rob_pos[0]-Obs_pos_x[j])/((d_obs_val-obs_r)**3))
-            #Fy_rep_val_t = 1.2*APF_Param[1]*(1-((d_obs_val-obs_r)/dprewarn))*((Rob_pos[1]-Obs_pos_y[j])/((d_obs_val-obs_r)**3))
             Fx_rep_val_t = 1.5*APF_Param[1]*(1-(d_obs_rob/dprewarn))*((Rob_pos[0]-Obs_pos_x[j])/(d_obs_rob**3))
             Fy_rep_val_t = 1.5*APF_Param[1]*(1-(d_obs_rob/dprewarn))*((Rob_pos[1]-Obs_pos_y[j])/(d_obs_rob**3))                                                       
-        #if (d_obs_val >= dprewarn):
-        #if ((d_obs_val < dsafe) and (d_obs_val > 0.0)):
-        #elif (d_obs_val_x < (dsafe + Obs_len_x[j]) and d_obs_val_y < (dsafe + Obs_len_y[j])):
         elif (d_obs_rob < dsafe):
             flaga = 1
-            #Fx_rep_val_t = 1.5*APF_Param[1]*(1-((d_obs_val-obs_r)/dprewarn))*((Rob_pos[0]-Obs_pos_x[j])/((d_obs_val-obs_r)**3))
-            #Fy_rep_val_t = 1.5*APF_Param[1]*(1-((d_obs_val-obs_r)/dprewarn))*((Rob_pos[1]-Obs_pos_y[j])/((d_obs_val-obs_r)**3))
             Fx_rep_val_t = 4.0*Fx_rep_val_t
             Fy_rep_val_t = 4.0*Fy_rep_val_t
         else:
             Fx_rep_val_t = 0.0
             Fy_rep_val_t = 0.0
-            #Fx_rep_val += -(Obs_len_y[j]/Obs_len_x[j])*APF_Param[1]*(1-(d_obs_val/(Obs_len_x[j]+dsafe)))*((Rob_pos[0]-Obs_pos_x[j])/(d_obs_val**3))
-            #Fy_rep_val += -(Obs_len_x[j]/Obs_len_y[j])*APF_Param[1]*(1-(d_obs_val/(Obs_len_y[j]+dsafe)))*((Rob_pos[1]-Obs_pos_y[j])/(d_obs_val**3))
-            #Fx_rep_val += -APF_Param[1]*(1-(d_obs_val/(Obs_len_x[j]+dsafe)))*(-(Rob_pos[0]-Obs_pos_x[j])/(d_obs_val**3))
-            #Fy_rep_val += -APF_Param[1]*(1-(d_obs_val/(Obs_len_y[j]+dsafe)))*(-(Rob_pos[1]-Obs_pos_y[j])/(d_obs_val**3))
-            #Fx_rep_val += Fx_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(D_obs,d_obs_val),(obs_len_x,Obs_len_x[j])])
-            #Fy_rep_val += Fy_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(D_obs,d_obs_val),(obs_len_y,Obs_len_y[j])])
-            #Fx_rep_val += Fx_rep.subs([(x_rob,Rob_pos[0]),(x_obs,Obs_pos_x[j]),(d_obs_x,d_obs_val_x),(obs_len_x,Obs_len_x[j])])
-            #Fy_rep_val += Fy_rep.subs([(y_rob,Rob_pos[1]),(y_obs,Obs_pos_y[j]),(d_obs_y,d_obs_val_y),(obs_len_y,Obs_len_y[j])])
-        '''if (d_obs_val_x < 0.0) and (d_obs_val_y < 0.0):
-        #if (d_obs_val < 0.0):
-            Fx_rep_val += 10*APF_Param[1]*((Rob_pos[0]-Obs_pos_x[j]-Obs_len_x[j])/(d_obs_val**3))
-            Fy_rep_val += 10*APF_Param[1]*((Rob_pos[1]-Obs_pos_y[j]-Obs_len_y[j])/(d_obs_val**3))'''   
-        
+            
         Fx_rep_val += Fx_rep_val_t
         Fy_rep_val += Fy_rep_val_t
         
         j +=1
-        
-    '''if (d_obs_min+dsafe) > d_goal:
-        Fx_rep_val=Fx_rep_val/20.0
-        Fy_rep_val=Fy_rep_val/20.0
-          
-    if (d_goal < 20.0) and (d_goal >= 7.0):
-        Fx_att_val = Fx_att_val*0.2
-        Fy_att_val = Fy_att_val*0.2
-    elif (d_goal < 7.0) and (d_goal >= 3.0):
-        Fx_att_val = Fx_att_val*0.4
-        Fy_att_val = Fy_att_val*0.4
-    elif (d_goal < 3.0) and (d_goal >= 2.0):
-        Fx_att_val = Fx_att_val*0.5
-        Fy_att_val = Fy_att_val*0.5
-    elif (d_goal < 3.0) and (d_goal >= 2.0):
-        Fx_att_val = Fx_att_val*0.5
-        Fy_att_val = Fy_att_val*0.5
-    elif (d_goal < 1.0) and (d_goal >= 0.8):
-        Fx_att_val = Fx_att_val*1.1
-        Fy_att_val = Fy_att_val*1.1
-    elif (d_goal < 0.8) and (d_goal >= 0.4):
-        Fx_att_val = Fx_att_val*1.2
-        Fy_att_val = Fy_att_val*1.2
-    else:
-        Fx_att_val = Fx_att_val*1.5
-        Fy_att_val = Fy_att_val*1.5'''
     
+    if ((d_obs_min - 0.25) >  d_goal):
+        Fx_rep_val = Fx_rep_val*d_goal
+        Fy_rep_val = Fy_rep_val*d_goal
         
     if flaga == 1:
-        #Fx_att_val = Fx_att_val/2
-        #Fy_att_val = Fy_att_val/2
         Fx_net_val = (Fx_att_val + Fx_rep_val)/3
         Fy_net_val = (Fy_att_val + Fy_rep_val)/3
     else:
         Fx_net_val = Fx_att_val + Fx_rep_val
-        Fy_net_val = Fy_att_val + Fy_rep_val
-    '''    
-    if d_goal < 1.5:
-        Fx_net_val = Fx_net_val*1.02
-        Fy_net_val = Fx_net_val*1.02
-        
-    if d_goal < 1.0:
-        Fx_net_val = Fx_net_val*1.02
-        Fy_net_val = Fx_net_val*1.02
-    if d_goal < 0.5:
-        Fx_net_val = Fx_net_val*1.02
-        Fy_net_val = Fx_net_val*1.02'''
-        
+        Fy_net_val = Fy_att_val + Fy_rep_val       
         
     F_xy_net = [Fx_net_val,Fy_net_val]
     return F_xy_net
@@ -367,7 +267,7 @@ def APF_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,APF_Param,dsafe,Obs_len_x,Obs_le
 while 1 and not rospy.is_shutdown():
     if flag_cont == 1:
         
-        sub_goal = rospy.Subscriber('goal', Float64MultiArray, get_Goal)      #Identify the subscriber "sub1" to subscribe topic "/odom" of type "Odometry"
+        #sub_goal = rospy.Subscriber('goal', Float64MultiArray, get_Goal)      #Identify the subscriber "sub1" to subscribe topic "/odom" of type "Odometry"
         Goal_Pos = goal_data
         #Get Robot Current Position and Velocity
         Rob_pos = [position[0],position[1],position[3]]

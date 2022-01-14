@@ -30,7 +30,7 @@
   <node pkg="agv_ppot" name="Lapunov" type="Lapunov.py">
     <param name="K_x" value="0.5" />   
     <param name="K_theta" value="1.5" />
-    <param name="Vd_des" value="0.00005" />   
+    <param name="Vd_des" value="0.0001" />   
     <param name="Omega_des" value="0.00" />
   </node>
   <node pkg="agv_ppot" name="AGVInterfejsApp" type="AGVInterfejsApp.py">
