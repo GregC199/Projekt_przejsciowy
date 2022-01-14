@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 #########################################################################################################
-#Import the required libraries:
 import rospy
 from geometry_msgs.msg import Twist,Pose
 from nav_msgs.msg import Odometry
@@ -17,7 +16,7 @@ from std_msgs.msg._Float64MultiArray import Float64MultiArray
 
 #######################################################################
 #Initialize ROS Node
-rospy.init_node('Path_Planning_APF', anonymous=True) #Identify ROS Node
+rospy.init_node('Path_Planning_PPot', anonymous=True) #Node Path planning "Pola Potencjalne" (eng. potential field)
 #######################################################################
 APF_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep")] #Reinforcement attraction, repulsion
 tau = rospy.get_param("~sampling_time") #Sampling Time
@@ -29,12 +28,15 @@ Rob_rate = 10
 pub1 = rospy.Publisher('/APF_Des_Pos', Pose, queue_size=10) #Identify the publisher "pub1" to publish on topic "/APF_Des_Pos" to send message of type "Pose"
 Des_Pos_msg = Pose() #Identify msg variable of data type Twist
 rate = rospy.Rate(Rob_rate) # rate of publishing msg 20hz
+#######################################################################
+#
 Obs_Pos_x = [ -7.5,-5.5,-3.5,-1.5,  5.0,5.0,  -8.5, -7.5, -5.5, -4.5, -3.5, -1.5, -1.5, 2.5, 4.5, 3.5, 4.5, 7.5 ]
 Obs_Pos_y = [ -6.0,-6.0,-6.0,-6.0,  -7.5,-4.5,  1.5, 7.5, 4.5, 7.5, 1.5, 2.5, 6.5, 0.5, 6.5, 1.5, 2.5, 4.5 ]
 Obs_len_x = [ 0.5,0.5,0.5,0.5,  3.0, 3.0,  0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5 ]
 Obs_len_y = [ 2.0,2.0,2.0,2.0,  0.5,0.5,  0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5 ]
-dsafe=0.36 # Safe distance
-dprewarn=0.7 # Prewarn distance
+dsafe=0.4 # Safe distance
+dprewarn=0.75 # Prewarn distance
+dnonlimit=1.5 # Increased speed distance
 
 
 #######################################################################
@@ -194,8 +196,8 @@ def APF_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,APF_Param,dsafe,Obs_len_x,Obs_le
     
     d_goal = sqrt((Rob_pos[0]-Goal_pos[0])**2+(Rob_pos[1]-Goal_pos[1])**2)
     
-    Fx_att_val = -(0.25+1.65/(d_goal+0.3))*APF_Param[0]*(Rob_pos[0]-Goal_pos[0])
-    Fy_att_val = -(0.25+1.65/(d_goal+0.3))*APF_Param[0]*(Rob_pos[1]-Goal_pos[1])
+    Fx_att_val = -(0.05+1.6/(d_goal+0.165))*APF_Param[0]*(Rob_pos[0]-Goal_pos[0])
+    Fy_att_val = -(0.05+1.6/(d_goal+0.165))*APF_Param[0]*(Rob_pos[1]-Goal_pos[1])
 
     Fx_rep_val=0.0
     Fy_rep_val=0.0
@@ -204,6 +206,8 @@ def APF_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,APF_Param,dsafe,Obs_len_x,Obs_le
     
     d_obs_min = 20.0
     
+    a = 0.0
+    b = 0.0
     
     
     while j<18:
@@ -234,8 +238,9 @@ def APF_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,APF_Param,dsafe,Obs_len_x,Obs_le
             Fy_rep_val_t = 1.5*APF_Param[1]*(1-(d_obs_rob/dprewarn))*((Rob_pos[1]-Obs_pos_y[j])/(d_obs_rob**3))                                                       
         elif (d_obs_rob < dsafe):
             flaga = 1
-            Fx_rep_val_t = 4.0*Fx_rep_val_t
-            Fy_rep_val_t = 4.0*Fy_rep_val_t
+            
+            Fx_rep_val_t = 6.0*Fx_rep_val_t
+            Fy_rep_val_t = 6.0*Fy_rep_val_t
         else:
             Fx_rep_val_t = 0.0
             Fy_rep_val_t = 0.0
@@ -244,17 +249,33 @@ def APF_Fn(Rob_pos,Goal_pos,Obs_pos_x,Obs_pos_y,APF_Param,dsafe,Obs_len_x,Obs_le
         Fy_rep_val += Fy_rep_val_t
         
         j +=1
+        
     
     if ((d_obs_min - 0.25) >  d_goal):
-        Fx_rep_val = Fx_rep_val*d_goal
-        Fy_rep_val = Fy_rep_val*d_goal
+        Fx_rep_val = Fx_rep_val*d_goal*0.5
+        Fy_rep_val = Fy_rep_val*d_goal*0.5
+    
         
     if flaga == 1:
-        Fx_net_val = (Fx_att_val + Fx_rep_val)/3
-        Fy_net_val = (Fy_att_val + Fy_rep_val)/3
+        Fx_net_val = (Fx_att_val + Fx_rep_val)/3.0
+        Fy_net_val = (Fy_att_val + Fy_rep_val)/3.0
     else:
         Fx_net_val = Fx_att_val + Fx_rep_val
-        Fy_net_val = Fy_att_val + Fy_rep_val       
+        Fy_net_val = Fy_att_val + Fy_rep_val
+        
+        
+    if (d_obs_min > dnonlimit):
+        Fx_net_val = Fx_net_val*4.0
+        Fy_net_val = Fy_net_val*4.0
+    elif ((d_obs_min <= dnonlimit) and (d_obs_min > dprewarn)):
+        a = -3.0 / ( dprewarn - dnonlimit )
+        b = 4.0 - a * dnonlimit
+        Fx_net_val = Fx_net_val*(d_obs_min*a+b)
+        Fy_net_val = Fy_net_val*(d_obs_min*a+b)
+        
+    if (d_goal < 0.05):
+        Fx_net_val = Fx_net_val*0.5
+        Fy_net_val = Fy_net_val*0.5
         
     F_xy_net = [Fx_net_val,Fy_net_val]
     return F_xy_net
