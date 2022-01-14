@@ -89,6 +89,10 @@ class Ui_MainWindow(object):
     
     tryb_reczny = Bool()
     
+    obs_n = 18
+    Obs_pos_y = [[-7.0, -8.0], [-5.0, -6.0], [-3.0, -4.0], [-1.0, -2.0], [2.0, 8.0], [2.0, 8.0], [-9.0, -8.0], [-8.0, -7.0], [-6.0, -5.0], [-5.0, -4.0], [-4.0, -3.0], [-2.0, -1.0], [-2.0, -1.0], [2.0, 3.0], [4.0, 5.0], [3.0, 4.0], [4.0, 5.0], [7.0, 8.0]]
+    Obs_pos_x = [[-8.0, -4.0], [-8.0, -4.0], [-8.0, -4.0], [-8.0, -4.0], [-8.0, -7.0], [-5.0, -4.0], [1.0, 2.0], [7.0, 8.0], [4.0, 5.0], [7.0, 8.0],[1.0, 2.0], [2.0, 3.0], [6.0, 7.0], [0.0, 1.0], [6.0, 7.0], [1.0, 2.0], [2.0, 3.0],[4.0, 5.0]]
+    
     pub_mode = rospy.Publisher('opertaing_mode', Bool, queue_size=800)
     
     def setupUi(self, MainWindow):
@@ -1577,6 +1581,16 @@ class Ui_MainWindow(object):
         self.sc.canvas.ax.plot([-10, 10],[-10, -10], 'r',linewidth=1.5)
         self.sc.canvas.ax.plot([-10, -10],[-10, 10], 'r',linewidth=1.5)
         self.sc.canvas.ax.plot([10, 10],[-10, 10], 'r',linewidth=1.5)
+        
+        for i in range(self.obs_n):
+            self.sc.canvas.ax.plot([ self.Obs_pos_x[i][0], self.Obs_pos_x[i][0] ], [self.Obs_pos_y[i][0], self.Obs_pos_y[i][1]] , 'r',linewidth=1.5)
+            self.sc.canvas.ax.plot([ self.Obs_pos_x[i][1], self.Obs_pos_x[i][1] ], [self.Obs_pos_y[i][0], self.Obs_pos_y[i][1]] , 'r',linewidth=1.5)
+            self.sc.canvas.ax.plot([ self.Obs_pos_x[i][0], self.Obs_pos_x[i][1] ], [self.Obs_pos_y[i][0], self.Obs_pos_y[i][0]] , 'r',linewidth=1.5)
+            self.sc.canvas.ax.plot([ self.Obs_pos_x[i][0], self.Obs_pos_x[i][1] ], [self.Obs_pos_y[i][1], self.Obs_pos_y[i][1]] , 'r',linewidth=1.5)
+        
+            
+
+        
         self.sc.canvas.ax.set_xlabel("Y")
         self.sc.canvas.ax.set_ylabel("X")
         
