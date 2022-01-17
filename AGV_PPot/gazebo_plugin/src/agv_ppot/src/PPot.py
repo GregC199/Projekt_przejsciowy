@@ -15,7 +15,7 @@ from std_msgs.msg._Float64MultiArray import Float64MultiArray
 #########################################################################################################
 
 #######################################################################
-#Initialize ROS Node
+#Initialize ROS node
 rospy.init_node('Path_Planning_PPot', anonymous=True) #Node Path planning "Pola Potencjalne" (eng. potential field)
 #######################################################################
 PPot_Param = [rospy.get_param("~K_att"),rospy.get_param("~K_rep")] #Reinforcement attraction, repulsion

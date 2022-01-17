@@ -77,7 +77,7 @@ def callback_Des_Pos(data):
     position_des = [pos_msg.position.x,pos_msg.position.y,pos_msg.position.z,yaw, pitch, roll]
     flag_cont_1 = 1
 
-sub0 = rospy.Subscriber('/APF_Des_Pos', Pose, callback_Des_Pos) #Identify the subscriber "sub2" to subscribe topic "/turtle1/pose" of type "Pose"
+sub0 = rospy.Subscriber('/PPot_Des_Pos', Pose, callback_Des_Pos) #Identify the subscriber "sub2" to subscribe topic "/turtle1/pose" of type "Pose"
 #######################################################################
 
 #######################################################################

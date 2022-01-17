@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 from std_msgs.msg._Float64MultiArray import Float64MultiArray
 from std_msgs.msg._Bool import Bool
 from nav_msgs.msg import Odometry
+from geometry_msgs.msg import Twist
 
 matplotlib.use('QT5Agg')
 import rospy
@@ -94,6 +95,11 @@ class Ui_MainWindow(object):
     Obs_pos_x = [[-8.0, -4.0], [-8.0, -4.0], [-8.0, -4.0], [-8.0, -4.0], [-8.0, -7.0], [-5.0, -4.0], [1.0, 2.0], [7.0, 8.0], [4.0, 5.0], [7.0, 8.0],[1.0, 2.0], [2.0, 3.0], [6.0, 7.0], [0.0, 1.0], [6.0, 7.0], [1.0, 2.0], [2.0, 3.0],[4.0, 5.0]]
     
     pub_mode = rospy.Publisher('opertaing_mode', Bool, queue_size=800)
+    
+    pub_vel = rospy.Publisher('/cmd_vel', Twist, queue_size=10) #Identify the publisher "pub_vel" to publish on topic "/cmd_vel" to send message of type "Twist"
+    vel_msg = Twist() #Identify msg variable of data type Twist
+    vel_man_lin = 0.0
+    vel_man_ang = 0.0
     
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -1511,6 +1517,10 @@ class Ui_MainWindow(object):
         self.timer.start()
         self.pushButton_2.clicked.connect(self.click_auto)
         self.pushButton.clicked.connect(self.click_manual)
+        self.ButtonPredkoscPlus.clicked.connect(self.click_lin_plus)
+        self.ButtonPredkoscMinus.clicked.connect(self.click_lin_minus)
+        self.ButtonSkretPrawo.clicked.connect(self.click_ang_prawo)
+        self.ButtonSkretLewo.clicked.connect(self.click_ang_lewo)
         
         self.ButtonPredkoscMinus.setEnabled(False)
         self.ButtonPredkoscPlus.setEnabled(False)
@@ -1530,6 +1540,16 @@ class Ui_MainWindow(object):
         
         self.pub_mode.publish(self.tryb_reczny)
         
+    def send_velocity(self):
+        self.vel_msg.linear.x = round(self.vel_man_lin,3) #Linear Velocity
+        self.vel_msg.linear.y = 0.0
+        self.vel_msg.linear.z = 0.0
+        self.vel_msg.angular.x = 0.0
+        self.vel_msg.angular.y = 0.0
+        self.vel_msg.angular.z = round(self.vel_man_ang,3) #Angular Velocity
+        
+        self.pub_vel.publish(self.vel_msg)
+        
     def click_manual(self):
         self.tryb_reczny.data = True
         
@@ -1540,8 +1560,33 @@ class Ui_MainWindow(object):
         self.pushButton.setEnabled(False)
         self.pushButton_2.setEnabled(True)
         
+        self.vel_man_ang = 0.0
+        self.vel_man_lin = 0.0
+        
         self.pub_mode.publish(self.tryb_reczny)
+        
+        self.send_velocity()
+        
+    def click_lin_plus(self):
+        self.vel_man_lin += 0.1
+        
+        self.send_velocity()
+        
+    def click_lin_minus(self):
+        self.vel_man_lin -= 0.1
+        
+        self.send_velocity()
+        
+    def click_ang_prawo(self):
+        self.vel_man_ang -= 0.3
+        
+        self.send_velocity()
                 
+    def click_ang_lewo(self):
+        self.vel_man_ang += 0.3
+        
+        self.send_velocity()
+        
     def callback(self, data):
         msg = data
         self.rob_x = round(msg.pose.pose.position.x, 8)        #Round the value of x to 2 decimal places
